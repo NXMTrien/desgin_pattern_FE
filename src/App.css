@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* * LƯU Ý: Phần lớn giao diện của ứng dụng này được xử lý bởi các lớp Tailwind CSS 
+ * được nhúng trực tiếp trong file App.jsx (ví dụ: bg-indigo-600, flex, space-x-4).
+ * * Đây chỉ là các định nghĩa CSS cơ bản cho font chữ và các thành phần tùy chỉnh.
+ */
+
+/* Thiết lập font chữ Inter cho toàn bộ trang web */
+body {
+    font-family: 'Inter', sans-serif;
+    /* Ngăn chặn thanh cuộn ngang không cần thiết */
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Đảm bảo khung nhìn toàn màn hình và loại bỏ margin/padding mặc định */
+.min-h-screen {
+    min-height: 100vh;
+}
+
+/* Kiểu cho thông báo tùy chỉnh (custom-alert)
+ * Các lớp Tailwind CSS như fixed, bottom-4, right-4, và shadow-lg được áp dụng
+ * trong file App.jsx, nhưng đây là định nghĩa cơ bản cho tham khảo.
+ */
+#custom-alert {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    font-size: 0.875rem; 
+    transition: opacity 0.3s ease-in-out;
+    z-index: 50;
+    /* Ban đầu ẩn, chỉ hiển thị khi hàm alert(message) trong App.jsx được gọi */
+    display: none; 
+}
+
+/* Animation cho loader */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
