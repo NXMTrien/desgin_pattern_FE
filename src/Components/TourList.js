@@ -69,10 +69,10 @@ const TourList = () => {
           tours.map((tour) => (
             <Col md={4} sm={6} xs={12} key={tour._id} className="mb-4">
               <Card className="shadow-sm border-0 h-100" style={{ borderRadius: '12px' }}>
-                {tour.image && (
+                {tour.imageCover && (
                   <Card.Img
                     variant="top"
-                    src={tour.image}
+                    src={`http://localhost:5000/img/tours/${tour.imageCover}`}
                     alt={tour.name}
                     style={{ height: '220px', objectFit: 'cover' }}
                   />

@@ -11,6 +11,7 @@ import TourList from './Components/TourList';
 import CustomTourPage from './Components/CustomTourPage';
 import AdminCustomTourPage from './Components/AdminCustomTourPage';
 import PaymentPage from './Components/PaymentPage';
+import VerifyEmailForm from './Components/VerifyEmailForm';
 import { customAlert } from './utils/customAlert';
 
 export default function App() {
@@ -86,6 +87,7 @@ export default function App() {
                <Route path="/custom-tour" element={<CustomTourPage />} />
                 <Route path="/admin-custom-tour" element={<AdminCustomTourPage />} />
                <Route path="/payment" element={<PaymentPage />} />
+               <Route path="/verify-email" element={<VerifyEmailForm/>} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>
