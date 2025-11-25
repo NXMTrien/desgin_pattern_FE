@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const PaymentPage = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-
-  const API_URL = "http://localhost:5000/api"; // Đổi nếu backend khác port
+  const API_URL = "http://localhost:5000/api";
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  // ✅ Lấy danh sách booking của người dùng
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true);
@@ -23,10 +23,8 @@ const PaymentPage = () => {
           headers: getAuthHeaders(),
         });
         const allBookings = res.data.data.bookings || [];
-
-        // Lọc ra chỉ những booking chưa thanh toán
         const pendingBookings = allBookings.filter(
-          (b) =>["pending_payment", "pending"].includes(b.status)
+          (b) => ["pending_payment", "pending"].includes(b.status)
         );
         setBookings(pendingBookings);
       } catch (error) {
@@ -36,31 +34,13 @@ const PaymentPage = () => {
         setLoading(false);
       }
     };
-
     fetchBookings();
   }, []);
 
-  // ✅ Xử lý thanh toán (giả lập)
-  const handlePayment = async (bookingId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn thanh toán cho tour này?")) return;
-
-    try {
-      // Giả lập thanh toán thành công bằng cách cập nhật status = 'paid'
-      await axios.put(
-        `${API_URL}/bookings/${bookingId}`,
-        { status: "paid" },
-        { headers: getAuthHeaders() }
-      );
-
-      setBookings(bookings.filter((b) => b._id !== bookingId));
-      alert("✅ Thanh toán thành công!");
-    } catch (error) {
-      console.error("Lỗi thanh toán:", error.response?.data || error);
-      alert("❌ Thanh toán thất bại.");
-    }
+  const handlePayment = (bookingId) => {
+    navigate(`/checkout/${bookingId}`);
   };
 
-  // 🌀 Loading
   if (loading) {
     return (
       <div className="text-center mt-5">
@@ -73,9 +53,7 @@ const PaymentPage = () => {
   return (
     <Container className="my-4">
       <h2 className="text-center fw-bold mb-4">💳 Trang Thanh Toán Tour</h2>
-
       {message && <Alert variant="danger">{message}</Alert>}
-
       {bookings.length === 0 ? (
         <Alert variant="info" className="text-center">
           Bạn chưa có tour nào cần thanh toán.
@@ -96,11 +74,11 @@ const PaymentPage = () => {
                 <Card.Body>
                   <Card.Title>{booking.tour?.title}</Card.Title>
                   <Card.Text>
-  <strong>Tour:</strong> {booking.tour?.title || booking.customTour?.title|| "Chuyến Đi Tự Chọn Của Bạn"}
-</Card.Text>
-<Card.Text>
-  <strong>Điểm đến:</strong> {booking.tour?.destination || booking.customTour?.destination||"Chưa Rõ"}
-</Card.Text>
+                    <strong>Tour:</strong> {booking.tour?.title || booking.customTour?.title || "Chuyến Đi Tự Chọn Của Bạn"}
+                  </Card.Text>
+                  <Card.Text>
+                    <strong>Điểm đến:</strong> {booking.tour?.destination || booking.customTour?.destination || "Chưa Rõ"}
+                  </Card.Text>
                   <Card.Text>
                     <strong>Ngày khởi hành:</strong> {new Date(booking.startDate).toLocaleDateString()}
                   </Card.Text>
@@ -108,8 +86,7 @@ const PaymentPage = () => {
                     <strong>Số người:</strong> {booking.numberOfPeople}
                   </Card.Text>
                   <Card.Text>
-                    <strong>Tổng tiền:</strong>{" "}
-                    {booking.totalPrice?.toLocaleString()} VNĐ
+                    <strong>Tổng tiền:</strong> {booking.totalPrice?.toLocaleString()} VNĐ
                   </Card.Text>
                   <Card.Text>
                     <span className="badge bg-warning text-dark">Chờ thanh toán</span>

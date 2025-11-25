@@ -12,7 +12,10 @@ import CustomTourPage from './Components/CustomTourPage';
 import AdminCustomTourPage from './Components/AdminCustomTourPage';
 import PaymentPage from './Components/PaymentPage';
 import VerifyEmailForm from './Components/VerifyEmailForm';
+import ForgotPassword from './Components/ForgotPassword';
+import CheckoutBankPage from './Components/CheckoutPage';
 import { customAlert } from './utils/customAlert';
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -88,6 +91,8 @@ export default function App() {
                 <Route path="/admin-custom-tour" element={<AdminCustomTourPage />} />
                <Route path="/payment" element={<PaymentPage />} />
                <Route path="/verify-email" element={<VerifyEmailForm/>} />
+               <Route path="/forgot_password" element={<ForgotPassword/>} />
+                <Route path="/checkout/:bookingId" element={<CheckoutBankPage/>} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>

@@ -64,7 +64,7 @@ function LoginForm() {
         <button type="submit" className="btn btn-primary w-100">
           Đăng nhập
         </button>
-<p className="text-center mt-3">
+      <p className="text-center mt-3">
         Chưa có tài khoản?{" "}
         <button
           type="button"
@@ -72,6 +72,16 @@ function LoginForm() {
           onClick={() => navigate("/register")}
         >
           Đăng ký ngay
+        </button>
+      </p>
+       <p className="text-center mt-3">
+        Bạn đã quên mật khẩu rồi?{" "}
+        <button
+          type="button"
+          className="btn btn-link p-0"
+          onClick={() => navigate("/forgot_password")}
+        >
+          Quên Mật Khẩu
         </button>
       </p>
       </form>
