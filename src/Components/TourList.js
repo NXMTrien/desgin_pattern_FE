@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Spinner } from 'react-bootstrap';
+import {
+  Container, Row, Col, Card, Button,
+  Spinner, Modal, Form, Alert
+} from 'react-bootstrap';
 
 const TourList = () => {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = 'http://localhost:5000/api'; 
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTour, setSelectedTour] = useState(null);
 
- const navigate = useNavigate();
+  const [form, setForm] = useState({
+    numberOfPeople: "",
+    startDate: "",
+    endDate: ""
+  });
+
+  const [errors, setErrors] = useState("");
+
+  const API_URL = 'http://localhost:5000/api';
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTours = async () => {
@@ -25,36 +38,83 @@ const TourList = () => {
     fetchTours();
   }, []);
 
-  // Xử lý đặt tour
-  const handleBooking = async (tourId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập trước khi đặt tour!');
-      return;
+  // Tính ngày kết thúc
+  const calculateEndDate = (start, duration) => {
+    if (!start || !duration) return "";
+    const date = new Date(start);
+    date.setDate(date.getDate() + (duration - 1)); // chuẩn "3 ngày 2 đêm"
+    return date.toISOString().split("T")[0];
+  };
+
+  // Bấm booking tour
+  const openBookingForm = (tour) => {
+    setSelectedTour(tour);
+    setForm({
+      numberOfPeople: "",
+      startDate: "",
+      endDate: ""
+    });
+    setErrors("");
+    setShowModal(true);
+  };
+
+  // Input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    let updatedForm = { ...form, [name]: value };
+
+    if (name === "startDate" && selectedTour?.duration) {
+      updatedForm.endDate = calculateEndDate(value, selectedTour.duration);
     }
 
-    const numberOfPeople = prompt('Nhập số người tham gia:');
-    const startDate = prompt('Nhập ngày khởi hành (yyyy-mm-dd):');
-    if (!numberOfPeople || !startDate) return;
+    setForm(updatedForm);
+  };
+
+  // Gửi booking
+  const handleConfirmBooking = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Vui lòng đăng nhập!");
+
+    // Validate
+    if (!form.numberOfPeople || !form.startDate) {
+      return setErrors("Vui lòng nhập đầy đủ thông tin.");
+    }
+
+    const maxSize = selectedTour?.maxGroupSize || 100;
+    if (parseInt(form.numberOfPeople) > maxSize) {
+      return setErrors(`Số người tối đa cho tour này là ${maxSize}.`);
+    }
 
     try {
       const res = await axios.post(
         `${API_URL}/bookings`,
-        { tour: tourId, numberOfPeople, startDate },
+        {
+          tour: selectedTour._id,
+          numberOfPeople: Number(form.numberOfPeople),
+          startDate: form.startDate,
+
+          // 🔥 VNPAY PHẢI GỬI bankCode + language
+          bankCode: "",
+          language: "vn"
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert(res.data.message || 'Đặt tour thành công!');
+
+      alert("Đặt tour thành công!");
+      setShowModal(false);
       navigate("/payment");
+
     } catch (error) {
-      alert(error.response?.data?.message || 'Đặt tour thất bại');
+      setErrors(error.response?.data?.message || "Đặt tour thất bại");
     }
   };
 
   if (loading) {
     return (
       <div className="text-center mt-5">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Đang tải danh sách tour...</p>
+        <Spinner animation="border" />
+        <p>Đang tải danh sách tour...</p>
       </div>
     );
   }
@@ -62,13 +122,14 @@ const TourList = () => {
   return (
     <Container className="my-4">
       <h2 className="text-center mb-4 fw-bold">Danh Sách Tour Du Lịch</h2>
+
       <Row>
         {tours.length === 0 ? (
-          <p className="text-center">Không có tour nào trong hệ thống.</p>
+          <p className="text-center">Không có tour nào.</p>
         ) : (
           tours.map((tour) => (
-            <Col md={4} sm={6} xs={12} key={tour._id} className="mb-4">
-              <Card className="shadow-sm border-0 h-100" style={{ borderRadius: '12px' }}>
+            <Col md={4} key={tour._id} className="mb-4">
+              <Card className="shadow-sm border-0 h-100">
                 {tour.imageCover && (
                   <Card.Img
                     variant="top"
@@ -80,21 +141,13 @@ const TourList = () => {
                 <Card.Body>
                   <Card.Title>{tour.title}</Card.Title>
                   <Card.Text>
-                    <strong>Điểm đến:</strong> {tour.destination || 'Chưa cập nhật'}
-                  </Card.Text>
-                  <Card.Text>
-                    {tour.description?.length > 100
-                      ? `${tour.description.slice(0, 100)}...`
-                      : tour.description}
+                    <strong>Điểm đến:</strong> {tour.destination}
                   </Card.Text>
                   <Card.Text>
                     <strong>Giá:</strong> {tour.price?.toLocaleString()} VNĐ
                   </Card.Text>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleBooking(tour._id)}
-                    className="w-100"
-                  >
+
+                  <Button className="w-100" onClick={() => openBookingForm(tour)}>
                     Booking Tour
                   </Button>
                 </Card.Body>
@@ -103,19 +156,52 @@ const TourList = () => {
           ))
         )}
       </Row>
-      <div className="text-center mb-4">
-        <p className="text-muted">
-          Nếu bạn muốn có những <strong>tour tự do</strong> phù hợp theo ý mình,{' '}
-          <Button
-            variant="link"
-            className="p-0 fw-bold text-decoration-none"
-            onClick={() => navigate('/custom-tour')}
-          >
-            hãy nhấn vào đây
+
+      {/* MODAL BOOKING */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Đặt Tour: {selectedTour?.title}</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {errors && <Alert variant="danger">{errors}</Alert>}
+
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Số người tham gia</Form.Label>
+              <Form.Control
+                type="number"
+                name="numberOfPeople"
+                value={form.numberOfPeople}
+                onChange={handleChange}
+                placeholder={`Tối đa ${selectedTour?.maxGroupSize || 100} người`}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Ngày khởi hành</Form.Label>
+              <Form.Control
+                type="date"
+                name="startDate"
+                value={form.startDate}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Ngày kết thúc</Form.Label>
+              <Form.Control type="date" value={form.endDate} disabled />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Hủy</Button>
+          <Button variant="primary" onClick={handleConfirmBooking}>
+            Xác nhận đặt tour
           </Button>
-          .
-        </p>
-      </div>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
