@@ -19,6 +19,8 @@ import TourDetail from './Components/TourDetail';
 import AdminPaymentConfirmation from './Components/AdminPaymentConfirmation';
 import Footer from './Components/AuthFooter';
 import { customAlert } from './utils/customAlert';
+import Contact from './Components/ContactPage';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
 export default function App() {
@@ -81,6 +83,7 @@ export default function App() {
                 <Route path="/checkout/:bookingId" element={<CheckoutBankPage/>} />
                 <Route path="/tour_detail/:id" element={<TourDetail/>} />
                 <Route path="/admin_payment" element={<AdminPaymentConfirmation />} />
+                <Route path="/contact" element={<Contact />} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>

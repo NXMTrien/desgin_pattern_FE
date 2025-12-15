@@ -38,6 +38,7 @@ function AuthHeader() {
               <li className="nav-item"><a className="nav-link" href="/tours-users">Tours</a></li>
               <li className="nav-item"><a className="nav-link" href="/payment">Payment</a></li>
               <li className="nav-item"><a className="nav-link" href="/">Home</a></li>
+               <li className="nav-item"><a className="nav-link" href="/contact">Contact</a></li>
             </ul>
           </div>
 </>
