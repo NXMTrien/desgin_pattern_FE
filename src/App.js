@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from "react-router-dom";
+import Home from './Components/HomePage';
 import AuthHeader from './Components/AuthHeader';
 import LoginForm from './Components/LoginForm';
 import RegisterForm from './Components/RegisterForm';
@@ -14,6 +15,9 @@ import PaymentPage from './Components/PaymentPage';
 import VerifyEmailForm from './Components/VerifyEmailForm';
 import ForgotPassword from './Components/ForgotPassword';
 import CheckoutBankPage from './Components/CheckoutPage';
+import TourDetail from './Components/TourDetail';
+import AdminPaymentConfirmation from './Components/AdminPaymentConfirmation';
+import Footer from './Components/AuthFooter';
 import { customAlert } from './utils/customAlert';
 
 
@@ -62,25 +66,7 @@ export default function App() {
 
       <main className="container pt-5 pb-5">
         <Routes>
-          <Route
-            path="/"
-            element={
-              <div style={{ marginTop: '5rem' }}>
-                <div className="p-5 mt-4 bg-white rounded-3 shadow-lg text-center mx-auto" style={{ maxWidth: '800px' }}>
-                  <h1 className="display-4 fw-bolder text-primary">
-                    {isLoggedIn
-                      ? `Chào mừng, ${currentUser?.username || currentUser?.email}!`
-                      : 'Chào mừng đến với Ứng dụng của Chúng tôi'}
-                  </h1>
-                  <p className="mt-4 fs-5 text-secondary">Chào Mừng Bạn Đến Với Trang Web Của Chùng Tôi.Rất Mong Bạn Hài Lòng</p>
-                  <div className="mt-4 d-flex justify-content-center gap-3">
-                    <button className="btn btn-primary btn-lg fw-semibold shadow-sm">Khám phá ngay</button>
-                    <button className="btn btn-outline-secondary btn-lg fw-semibold shadow-sm">Tìm hiểu thêm</button>
-                  </div>
-                </div>
-              </div>
-            }
-          />
+           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginForm onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/register" element={<RegisterForm />} />
             <Route path="/categoris_admin" element={<CategoryForm />} />
@@ -93,9 +79,12 @@ export default function App() {
                <Route path="/verify-email" element={<VerifyEmailForm/>} />
                <Route path="/forgot_password" element={<ForgotPassword/>} />
                 <Route path="/checkout/:bookingId" element={<CheckoutBankPage/>} />
+                <Route path="/tour_detail/:id" element={<TourDetail/>} />
+                <Route path="/admin_payment" element={<AdminPaymentConfirmation />} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>
+        <Footer />
 
       <div id="custom-alert" className="fixed-bottom end-0 text-white p-3 rounded-start shadow-lg z-3 d-none"></div>
     </div>

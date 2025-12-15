@@ -14,39 +14,32 @@ function AuthHeader() {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-      <Link className="navbar-brand" to="/lufian">
-        🍽️ Tourify
-      </Link>
+      <a className="navbar-brand d-flex align-items-center" href="#">
+            <div className="rounded-circle d-inline-block me-2" style={{width:36, height:36, backgroundColor: 'var(--brand-500)'}}></div>
+            <span style={{fontWeight:700, color:'#f0f0f5ff'}}>Tourify</span>
+          </a>
 
       <div className="ms-auto d-flex align-items-center gap-3">
         {token && role === "admin" ? (
           <>
-            <Link className="btn btn-outline-light" to="/tours_admin">
-              Quản lý Tour
-            </Link>
-            <Link className="btn btn-outline-light" to="/categoris_admin">
-              Quản lý Danh Mục
-            </Link>
-            <Link className="btn btn-outline-light" to="/manage-users">
-              Quản Lý Người Dùng
-            </Link>
-            <Link className="btn btn-outline-light" to="/admin-custom-tour">
-             Chờ Xác Nhận Tour Tự Chọn
-            </Link>
+            <div className="collapse navbar-collapse" id="navmenu">
+            <ul className="navbar-nav ms-auto align-items-lg-center">
+              <li className="nav-item"><a className="nav-link" href="/tours_admin">Tours Manager</a></li>
+              <li className="nav-item"><a className="nav-link" href="/admin_payment">Payment Confirm</a></li>
+              <li className="nav-item"><a className="nav-link" href="/manage-users">User Manager</a></li>
+            </ul>
+          </div>
             
           </>
         ) : token ? (
           <>
-  <Link className="btn btn-outline-light me-2" to="/">
-    Trang chủ
-  </Link>
-<Link className="btn btn-outline-light" to="/payment">
-    Chờ Thanh Toán 
-  </Link>
-  
-  <Link className="btn btn-outline-light" to="/tours-users">
-    Tour du lịch
-  </Link>
+  <div className="collapse navbar-collapse" id="navmenu">
+            <ul className="navbar-nav ms-auto align-items-lg-center">
+              <li className="nav-item"><a className="nav-link" href="/tours-users">Tours</a></li>
+              <li className="nav-item"><a className="nav-link" href="/payment">Payment</a></li>
+              <li className="nav-item"><a className="nav-link" href="/">Home</a></li>
+            </ul>
+          </div>
 </>
           
         ) : null}
