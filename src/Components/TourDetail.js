@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Form, Alert, Card } from 'react-bootstrap';
+import { Button, Form, Alert, Card,Modal } from 'react-bootstrap';
 import { MapPin, Clock, Users, DollarSign, BookOpen, Star, MessageSquare } from 'lucide-react';
 
 // --- COMPONENT ĐÁNH GIÁ (MỚI) ---
@@ -11,6 +11,7 @@ const ReviewSection = ({ tourId }) => {
     const [comment, setComment] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    
 
     const fetchReviews = async () => {
         try {
@@ -173,6 +174,7 @@ const TourDetail = () => {
     const [mainImage, setMainImage] = useState(null);
     const [form, setForm] = useState({ numberOfPeople: "", startDate: "", endDate: "" });
     const [errors, setErrors] = useState("");
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     useEffect(() => {
         const fetchTour = async () => {
@@ -221,9 +223,9 @@ const TourDetail = () => {
     const handleConfirmBooking = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
-            setErrors("❌ Bạn cần đăng nhập để đặt tour!");
-            return;
-        }
+        setShowLoginModal(true); 
+        return;
+    }
         if (!form.numberOfPeople || !form.startDate) {
             return setErrors("⚠️ Vui lòng nhập đầy đủ Số người và Ngày khởi hành!");
         }
@@ -297,7 +299,7 @@ const TourDetail = () => {
 
                 {/* Form đặt tour bên phải */}
                 <div className="col-md-4">
-                    <div className="p-4 border rounded shadow-lg bg-white sticky-top" style={{ top: '20px' }}>
+                    <div className="p-4 border rounded shadow-lg bg-white sticky-top" style={{ top: '80px', zIndex: '10' }}>
                         <h4 className="text-center mb-3">Đặt Tour Ngay</h4>
                         <div className="text-center mb-4">
                             <span className="text-danger fw-bolder" style={{ fontSize: "28px" }}>
@@ -305,6 +307,35 @@ const TourDetail = () => {
                             </span>
                             <span className="text-muted"> / người</span>
                         </div>
+                        <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
+    <Modal.Body className="text-center p-5">
+        <div className="mb-4">
+            <Star size={60} className="text-warning mb-2" fill="#ffc107" />
+            <div style={{fontSize: '50px', marginTop: '-40px'}}>🔑</div>
+        </div>
+        <h4 className="fw-bold text-dark">Yêu cầu đăng nhập</h4>
+        <p className="text-muted">
+            Bạn cần đăng nhập tài khoản để thực hiện chức năng đặt tour và quản lý chuyến đi của mình.
+        </p>
+        <div className="d-grid gap-2 mt-4">
+            <Button 
+                variant="primary" 
+                size="lg" 
+                className="fw-bold" 
+                onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
+            >
+                Đăng nhập ngay
+            </Button>
+            <Button 
+                variant="link" 
+                className="text-secondary" 
+                onClick={() => setShowLoginModal(false)}
+            >
+                Để sau
+            </Button>
+        </div>
+    </Modal.Body>
+</Modal>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Số người</Form.Label>

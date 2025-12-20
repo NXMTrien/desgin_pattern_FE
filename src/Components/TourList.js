@@ -14,6 +14,7 @@ const TourList = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedTour, setSelectedTour] = useState(null);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
   
   // Mới: State lưu trữ số người đã đặt theo từng ngày của tour đang chọn
   const [availability, setAvailability] = useState({}); 
@@ -134,7 +135,7 @@ const location = useLocation();
     return date.toISOString().split("T")[0];
   };
 
-  // MỚI: Hàm fetch số lượng chỗ đã đặt của Tour này
+  
   const fetchAvailability = async (tourId) => {
     try {
         // Giả sử bạn có API trả về: { "2023-12-20": 40, "2023-12-25": 10 }
@@ -147,20 +148,26 @@ const location = useLocation();
   };
 
   const openBookingForm = async (tour) => {
-    setSelectedTour(tour);
-    setErrors("");
-    
-    // Gọi API lấy chỗ trống (Nếu Backend của bạn đã tích hợp)
-    // await fetchAvailability(tour._id); 
+  const token = localStorage.getItem("token");
 
-    const firstDate = tour.startDate?.[0] || "";
-    setForm({ 
-      numberOfPeople: 1, 
-      startDate: firstDate, 
-      endDate: firstDate ? calculateEndDate(firstDate, tour.duration) : "" 
-    });
-    setShowModal(true);
-  };
+  // Nếu chưa đăng nhập, mở Modal thông báo thay vì Modal đặt tour
+  if (!token) {
+    setShowLoginAlert(true);
+    return;
+  }
+
+  // Nếu đã đăng nhập, thực hiện logic cũ
+  setSelectedTour(tour);
+  setErrors("");
+  
+  const firstDate = tour.startDate?.[0] || "";
+  setForm({ 
+    numberOfPeople: 1, 
+    startDate: firstDate, 
+    endDate: firstDate ? calculateEndDate(firstDate, tour.duration) : "" 
+  });
+  setShowModal(true);
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -312,6 +319,33 @@ const location = useLocation();
           )}
         </Col>
       </Row>
+      {/* --- MODAL THÔNG BÁO YÊU CẦU ĐĂNG NHẬP --- */}
+<Modal show={showLoginAlert} onHide={() => setShowLoginAlert(false)} centered>
+  <Modal.Body className="text-center p-5">
+    <div className="mb-4">
+      <i className="bi bi-person-exclamation text-warning" style={{ fontSize: "4rem" }}></i>
+    </div>
+    <h4 className="fw-bold mb-3">Bạn chưa đăng nhập</h4>
+    <p className="text-muted mb-4">
+      Vui lòng đăng nhập tài khoản để có thể thực hiện đặt tour và hưởng các ưu đãi dành riêng cho bạn .
+    </p>
+    <div className="d-grid gap-2">
+      <Button 
+        variant="primary" 
+        className="py-2 fw-bold" 
+        onClick={() => navigate("/login")}
+      >
+        ĐĂNG NHẬP NGAY
+      </Button>
+      <Button 
+        variant="outline-secondary" 
+        onClick={() => setShowLoginAlert(false)}
+      >
+        Để sau
+      </Button>
+    </div>
+  </Modal.Body>
+</Modal>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton className="bg-primary text-white">

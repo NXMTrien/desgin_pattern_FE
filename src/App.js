@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from "react-router-dom";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Home from './Components/HomePage';
 import AuthHeader from './Components/AuthHeader';
 import LoginForm from './Components/LoginForm';
@@ -17,6 +18,7 @@ import ForgotPassword from './Components/ForgotPassword';
 import CheckoutBankPage from './Components/CheckoutPage';
 import TourDetail from './Components/TourDetail';
 import AdminPaymentConfirmation from './Components/AdminPaymentConfirmation';
+import MyBookings from './Components/BookingUser';
 import Footer from './Components/AuthFooter';
 import { customAlert } from './utils/customAlert';
 import Contact from './Components/ContactPage';
@@ -43,26 +45,34 @@ export default function App() {
     }
   }, []);
 
-  const handleLoginSuccess = (token, username, email) => {
+  // Cập nhật hàm này để nhận thêm role (vì login thường hay google đều trả về role)
+  const handleLoginSuccess = (token, username, email, role) => {
     localStorage.setItem('authToken', token);
-    const userDetails = { username, email };
+    localStorage.setItem('role', role); // Lưu thêm role vào máy
+    
+    const userDetails = { username, email, role };
     localStorage.setItem('currentUser', JSON.stringify(userDetails));
+    
     customAlert(`Đăng nhập thành công! Chào mừng ${username || email}`);
     setIsLoggedIn(true);
     setCurrentUser(userDetails);
-    navigate("/"); // ✅ Sau khi login thì chuyển về trang chủ
+
+    // Chuyển hướng dựa trên role
+    role === "admin" ? navigate("/categoris_admin") : navigate("/"); 
   };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('role');
     setIsLoggedIn(false);
     setCurrentUser(null);
     customAlert('Bạn đã đăng xuất.');
-    navigate("/login"); // ✅ Sau khi logout thì chuyển về login
+    navigate("/login");
   };
 
   return (
+    <GoogleOAuthProvider clientId="292302259329-j3g04hfov9h6u3e138v4cjdue3j1p86t.apps.googleusercontent.com">
     <div className="bg-light min-vh-100">
       <AuthHeader isLoggedIn={isLoggedIn} onLogout={handleLogout} username={currentUser?.username} />
 
@@ -84,6 +94,7 @@ export default function App() {
                 <Route path="/tour_detail/:id" element={<TourDetail/>} />
                 <Route path="/admin_payment" element={<AdminPaymentConfirmation />} />
                 <Route path="/contact" element={<Contact />} />
+                 <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>
@@ -91,5 +102,6 @@ export default function App() {
 
       <div id="custom-alert" className="fixed-bottom end-0 text-white p-3 rounded-start shadow-lg z-3 d-none"></div>
     </div>
+    </GoogleOAuthProvider>
   );
 }
