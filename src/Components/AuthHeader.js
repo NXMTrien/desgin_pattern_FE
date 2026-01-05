@@ -35,13 +35,34 @@ function AuthHeader() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3 sticky-top">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3 sticky-top shadow">
       <div className="container-fluid">
         {/* LOGO */}
         <Link className="navbar-brand d-flex align-items-center" to="/">
-          <div className="rounded-circle d-inline-block me-2" style={{ width: 36, height: 36, backgroundColor: '#0d6efd' }}></div>
-          <span style={{ fontWeight: 700, color: '#fff' }}>Tourify</span>
-        </Link>
+  {/* Biểu tượng Logo mới */}
+  <div 
+    className="d-flex align-items-center justify-content-center me-2 shadow-sm" 
+    style={{ 
+      width: '40px', 
+      height: '40px', 
+      backgroundColor: '#0d6efd', 
+      borderRadius: '50%',     
+      color: '#ffffff' 
+    }}
+  >
+    <i className="bi bi-airplane-fill" style={{ fontSize: '24px' }}></i>
+  </div>
+
+  {/* Tên thương hiệu */}
+  <span style={{ 
+    fontWeight: 500, 
+    color: '#fff', 
+    letterSpacing: '1px',
+    fontSize: '20px'
+  }}>
+    Tourify_Magic
+  </span>
+</Link>
 
         {/* Nút Toggle cho Mobile */}
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
@@ -49,7 +70,7 @@ function AuthHeader() {
         </button>
 
         <div className="collapse navbar-collapse" id="navmenu">
-          {/* 1. MENU ĐIỀU HƯỚNG CHUNG (Ai truy cập cũng thấy) */}
+          {/* 1. MENU ĐIỀU HƯỚNG CHUNG */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className="nav-link" to="/">Trang chủ</Link>
@@ -64,24 +85,41 @@ function AuthHeader() {
             {/* Menu dành riêng cho USER đã đăng nhập */}
             {token && role !== "admin" && (
               <li className="nav-item">
-                <Link className="nav-link " to="/payment">Thanh toán</Link>
+                <Link className="nav-link" to="/payment">Thanh toán</Link>
               </li>
             )}
 
-            {/* Menu dành riêng cho ADMIN */}
+            {/* --- PHẦN ADMIN ĐÃ ĐƯỢC GOM NHÓM --- */}
             {token && role === "admin" && (
-              <>
-                <li className="nav-item"><Link className="nav-link text-warning" to="/tours_admin">Quản lý Tour</Link></li>
-                <li className="nav-item"><Link className="nav-link text-warning" to="/admin_payment">Xác nhận thanh toán</Link></li>
-                <li className="nav-item"><Link className="nav-link text-warning" to="/manage-users">Quản lý User</Link></li>
-              </>
+              <NavDropdown 
+                title={<span className="text-warning fw-bold"> Quản trị</span>} 
+                id="admin-management-dropdown"
+                menuVariant="dark"
+              >
+                <NavDropdown.Item as={Link} to="/admin_booking">
+                  <i className="bi bi-calendar-check me-2"></i> Quản lý Booking
+                </NavDropdown.Item>
+                
+                <NavDropdown.Item as={Link} to="/tours_admin">
+                  <i className="bi bi-map me-2"></i> Quản lý Tour
+                </NavDropdown.Item>
+
+                <NavDropdown.Item as={Link} to="/admin_payment">
+                  <i className="bi bi-credit-card me-2"></i> Xác nhận thanh toán
+                </NavDropdown.Item>
+
+                <NavDropdown.Divider />
+
+                <NavDropdown.Item as={Link} to="/manage-users">
+                  <i className="bi bi-people me-2"></i> Quản lý Người dùng
+                </NavDropdown.Item>
+              </NavDropdown>
             )}
           </ul>
 
-          {/* 2. PHẦN TÀI KHOẢN (Thay đổi dựa trên Login) */}
+          {/* 2. PHẦN TÀI KHOẢN (Hiển thị cuối Navbar) */}
           <div className="d-flex align-items-center gap-3">
             {token ? (
-              /* ĐÃ ĐĂNG NHẬP: Hiển thị Dropdown tên */
               <NavDropdown
                 title={
                   <span className="fw-bold text-white">
@@ -108,8 +146,7 @@ function AuthHeader() {
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              /* CHƯA ĐĂNG NHẬP: Hiển thị nút Đăng nhập */
-              <Link to="/login" className="btn btn-primary rounded-pill px-4">
+              <Link to="/login" className="btn btn-primary rounded-pill px-4 shadow-sm">
                 Đăng nhập
               </Link>
             )}

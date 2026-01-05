@@ -111,17 +111,42 @@ const removeDate = (dateToRemove) => {
 };
 
     // --- HÀM XÓA TOUR ---
-    const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc chắn muốn xóa tour này?")) return;
-        try {
-            await axios.delete(`http://localhost:5000/api/tours/${id}`, { headers: getAuthHeaders() });
-            setMessage("✅ Đã xóa tour thành công!");
-            fetchTours();
-        } catch (err) {
-            setMessage("❌ Lỗi khi xóa tour.");
-        }
-    };
+    // --- HÀM XÓA TOUR ---
+const handleDelete = async (tour) => {
+    // 1. Kiểm tra nhanh tại Frontend: Nếu có ngày khởi hành thì chặn luôn
+    // Lưu ý: Kiểm tra cả 'startDate' và 'startDates' tùy theo dữ liệu backend trả về
+    const dates = tour.startDate 
+    
+    if (dates && dates.length > 0) {
+        setMessage(`⚠️ Không thể xóa: Tour này đang có ${dates.length} lịch khởi hành. Hãy đợi chuyến đi kết thúc nhé!`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => setMessage(""), 6000);
+        return; // Dừng hàm, không gọi API
+    }
 
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa tour: ${tour.title}?`)) return;
+
+    try {
+       
+        await axios.delete(`http://localhost:5000/api/tours/${tour._id}`, { 
+            headers: getAuthHeaders() 
+        });
+
+        setMessage("✅ Đã xóa tour thành công!");
+        fetchTours(); // Tải lại danh sách mới nhất
+        if (editingTourId === tour._id) resetForm();
+
+    } catch (err) {
+        if (err.response && err.response.status === 404) {
+            setMessage("❌ Lỗi: Tour này không tồn tại hoặc đã bị xóa trước đó.");
+            fetchTours(); 
+        } else {
+            const serverMsg = err.response?.data?.message || "Lỗi hệ thống khi xóa.";
+            setMessage(`❌ Không thể xóa: ${serverMsg}`);
+        }
+    }
+    setTimeout(() => setMessage(""), 6000);
+};
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevData => ({ ...prevData, [name]: value }));
@@ -165,44 +190,52 @@ const removeDate = (dateToRemove) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
+    setMessage(""); // Xóa thông báo cũ
 
     try {
         const tourFormData = new FormData();
 
-        // Duyệt qua formData để append
+        // Append dữ liệu tour
         Object.keys(formData).forEach(key => {
             if (key === 'startDates') {
-                // GỬI TỪNG NGÀY MỘT VÀO CÙNG MỘT KEY 'startDate'
-                formData.startDates.forEach(date => {
-                    tourFormData.append('startDate', date);
-                });
+                formData.startDates.forEach(date => tourFormData.append('startDate', date));
             } else if (key !== 'currentDateInput' && !key.startsWith('blog')) {
-                // Với các trường khác, nếu giá trị là undefined thì gửi chuỗi rỗng để tránh lỗi React
                 tourFormData.append(key, formData[key] || "");
             }
         });
 
-        // Xử lý File... (giữ nguyên logic cũ của bạn)
         if (imageCover instanceof File) tourFormData.append('imageCover', imageCover);
         if (otherImages.length > 0) {
             otherImages.forEach(file => tourFormData.append('images', file));
         }
 
-        // Gửi API... (giữ nguyên)
         if (editingTourId) {
+            // --- CHẾ ĐỘ CẬP NHẬT ---
             await axios.patch(`http://localhost:5000/api/tours/${editingTourId}`, tourFormData, {
                 headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
             });
+            setMessage("✅ Cập nhật thông tin tour thành công!");
         } else {
-            // Logic POST tour + blog...
+            // --- CHẾ ĐỘ TẠO MỚI ---
+            // (Giả định logic POST tour + blog của bạn ở đây)
+            await axios.post(`http://localhost:5000/api/tours`, tourFormData, {
+                headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
+            });
+            setMessage("✅ Tạo tour mới thành công!");
         }
-        
-        // ... rest of logic
+
+        // --- SAU KHI THÀNH CÔNG ---
+        resetForm();      // Reset các ô nhập liệu và chế độ sửa
+        fetchTours();     // Tải lại danh sách tour mới
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Cuộn lên xem thông báo
+
     } catch (err) {
         console.error("Lỗi API:", err.response?.data);
-        setMessage(err.response?.data?.message || "❌ Lỗi không xác định.");
+        setMessage(`❌ ${err.response?.data?.message || "Lỗi không xác định."}`);
     } finally {
         setIsSubmitting(false);
+        // Tự động ẩn thông báo sau 5 giây
+        setTimeout(() => setMessage(""), 5000);
     }
 };
     if (role !== "admin") return <div className="container mt-5 alert alert-danger">❌ Quyền admin yêu cầu.</div>;
@@ -210,12 +243,22 @@ const removeDate = (dateToRemove) => {
     return (
         <div className="container mt-5 mb-5">
             <h2 className="text-center fw-bold text-uppercase">
-                {editingTourId ? "🔄 Chỉnh sửa Tour" : "📝 Tạo Tour Kèm Blog"}
+                {editingTourId ? "🔄 Chỉnh sửa Tour" : " Tạo Tour Kèm Blog"}
             </h2>
             <div className="text-center text-muted mb-3">{editingTourId && "Bạn đang trong chế độ chỉnh sửa thông tin tour"}</div>
             <hr />
             
-            {message && <div className={`alert mt-3 sticky-top ${message.startsWith('❌') || message.startsWith('⚠️') ? 'alert-danger' : 'alert-success'}`} style={{top: '10px', zIndex: 1000}}>{message}</div>}
+           {message && (
+    <div 
+        className={`alert mt-3 sticky-top shadow ${message.startsWith('❌') || message.startsWith('⚠️') ? 'alert-danger' : 'alert-success'}`} 
+        style={{ top: '20px', zIndex: 1050, borderRadius: '10px' }}
+    >
+        <div className="d-flex justify-content-between align-items-center">
+            <span>{message}</span>
+            <button type="button" className="btn-close" onClick={() => setMessage("")}></button>
+        </div>
+    </div>
+)}
 
             <form onSubmit={handleSubmit} className={`mt-4 p-4 rounded shadow-sm ${editingTourId ? 'bg-light border border-warning' : 'bg-white border'}`}> 
                 <div className="row">
@@ -357,9 +400,9 @@ const TourList = ({ tours, onEdit, onDelete, editingTourId }) => (
                                     <button className="btn btn-sm btn-outline-primary" onClick={() => onEdit(tour)}>
                                         <Edit3 size={16} /> Sửa
                                     </button>
-                                    <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(tour._id)}>
-                                        <Trash2 size={16} /> Xóa
-                                    </button>
+                                    <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(tour)}> 
+    <Trash2 size={16} /> Xóa
+</button>
                                 </div>
                             </td>
                         </tr>

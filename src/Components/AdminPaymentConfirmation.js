@@ -72,7 +72,7 @@ const AdminPaymentConfirmation = () => {
 
     return (
         <Container className="my-5">
-            <h2>💰 Xác Nhận Thanh Toán Chuyển Khoản </h2>
+            <h2> Xác Nhận Thanh Toán Chuyển Khoản </h2>
             <p className="text-muted">Quản lý các giao dịch mà khách hàng đã thông báo chuyển khoản.</p>
             
             <hr />
@@ -104,7 +104,15 @@ const AdminPaymentConfirmation = () => {
                                 <td><strong className='text-success'>{payment.amount.toLocaleString()} VNĐ</strong></td>
                                 {/* Giả định bạn có thể lưu nội dung chuyển khoản trong paymentDetails (tùy thuộc vào backend) */}
                                 <td>THANH TOAN BOOKING {payment.booking?.slice(-6)}</td> 
-                                <td>{new Date(payment.createdAt).toLocaleTimeString()}</td>
+                                <td>
+                {new Date(payment.createdAt).toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+            </td>
                                 <td>
                                     <Button 
                                         variant="success" 

@@ -20,6 +20,7 @@ import TourDetail from './Components/TourDetail';
 import AdminPaymentConfirmation from './Components/AdminPaymentConfirmation';
 import MyBookings from './Components/BookingUser';
 import Footer from './Components/AuthFooter';
+import AdminBooking from './Components/AdminBookingManager';
 import { customAlert } from './utils/customAlert';
 import Contact from './Components/ContactPage';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -95,6 +96,7 @@ export default function App() {
                 <Route path="/admin_payment" element={<AdminPaymentConfirmation />} />
                 <Route path="/contact" element={<Contact />} />
                  <Route path="/my-bookings" element={<MyBookings />} />
+               <Route path="/admin_booking" element={<AdminBooking />} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>
