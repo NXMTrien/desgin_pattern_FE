@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Eye, EyeOff, User, Mail, Phone, Calendar, Lock, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, Calendar } from 'lucide-react';
 
 function RegisterForm() {
   const [username, setUsername] = useState("");
@@ -22,7 +22,6 @@ function RegisterForm() {
     setError("");
     setSuccess("");
 
-    // KIỂM TRA TẠI FRONTEND: Mật khẩu khớp nhau mới gửi API
     if (password !== confirmPassword) {
         setError("Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!");
         return;
@@ -33,7 +32,7 @@ function RegisterForm() {
         username,
         email,
         password,
-        confirmPassword, // Gửi lên để backend kiểm tra lần nữa (như logic bạn vừa viết)
+        confirmPassword,
         phone,
         dateOfBirth,
       });
@@ -70,13 +69,6 @@ function RegisterForm() {
           box-shadow: 0 10px 25px rgba(0,0,0,0.05);
           width: 100%;
           max-width: 500px;
-        }
-
-        .brand-logo {
-          display: block;
-          margin: 0 auto 20px;
-          max-width: 150px;
-          cursor: pointer;
         }
 
         .register-title {
@@ -125,8 +117,9 @@ function RegisterForm() {
           color: #666;
         }
 
+        /* NÚT ĐĂNG KÝ: MẶC ĐỊNH XÁM - HOVER ĐỎ */
         .btn-register {
-          background-color: #e31b23;
+          background-color: #6c757d;
           color: white;
           font-weight: 700;
           padding: 12px;
@@ -135,11 +128,11 @@ function RegisterForm() {
           margin-top: 25px;
           text-transform: uppercase;
           width: 100%;
-          transition: all 0.3s;
+          transition: all 0.3s ease;
         }
 
         .btn-register:hover { 
-          background-color: #c41219; 
+          background-color: #e31b23; 
           transform: translateY(-2px);
           box-shadow: 0 5px 15px rgba(227, 27, 35, 0.3);
         }
@@ -157,6 +150,7 @@ function RegisterForm() {
           border: none;
           background: none;
           padding: 0;
+          cursor: pointer;
         }
 
         .input-container {
@@ -173,14 +167,12 @@ function RegisterForm() {
       `}</style>
 
       <div className="register-card">
-        
         <h2 className="register-title">Đăng ký thành viên</h2>
 
         {error && <div className="alert alert-danger py-2 small text-center">{error}</div>}
         {success && <div className="alert alert-success py-2 small text-center">{success}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Tên đăng nhập */}
           <div className="form-group-custom">
             <label>Họ và Tên <span>*</span></label>
             <div className="input-container">
@@ -196,7 +188,6 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* Ngày sinh */}
           <div className="form-group-custom">
             <label>Ngày sinh <span>*</span></label>
             <div className="input-container">
@@ -211,7 +202,6 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* Email */}
           <div className="form-group-custom">
             <label>Email <span>*</span></label>
             <div className="input-container">
@@ -227,7 +217,6 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* Điện thoại */}
           <div className="form-group-custom">
             <label>Số điện thoại <span>*</span></label>
             <div className="input-container">
@@ -243,7 +232,6 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* Mật khẩu */}
           <div className="form-group-custom">
             <label>Mật khẩu <span>*</span></label>
             <div className="input-container">
@@ -261,7 +249,6 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* TRƯỜNG MỚI: Xác nhận mật khẩu */}
           <div className="form-group-custom">
             <label>Xác nhận mật khẩu <span>*</span></label>
             <div className="input-container">

@@ -1,8 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-// Đảm bảo bạn có file CSS hoặc dùng các class Bootstrap tương ứng
-import "../css/VerifyEmailForm.css"; 
+import { Mail, Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 function ForgotPassword() {
     const navigate = useNavigate();
@@ -19,10 +18,6 @@ function ForgotPassword() {
     const [loading, setLoading] = useState(false);
 
     const inputRefs = useRef([]);
-
-    
-    const primaryBlue = "#0054a5";
-    const primaryRed = "#e32119";
 
     const handleChangeOtp = (element, index) => {
         if (isNaN(element.value)) return;
@@ -82,42 +77,77 @@ function ForgotPassword() {
     };
 
     return (
-        <div className="auth-wrapper d-flex flex-column align-items-center justify-content-center py-5" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+        <div className="forgot-wrapper">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+                
+                .forgot-wrapper { font-family: 'Poppins', sans-serif; background-color: #f4f4f4; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+                .forgot-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
+                .forgot-title { color: #005294; font-weight: 700; text-align: center; margin-bottom: 25px; font-size: 26px; }
+                
+                .form-group-custom { position: relative; margin-bottom: 25px; }
+                .form-group-custom label { font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block; }
+                .form-group-custom label span { color: red; }
+                
+                .input-underline { border: none; border-bottom: 1.5px solid #ccc; border-radius: 0; padding: 10px 0; width: 100%; outline: none; transition: border-color 0.3s; background: transparent; }
+                .input-underline:focus { border-bottom-color: #005294; }
+                
+                .field-icon { position: absolute; right: 0; bottom: 10px; color: #ccc; }
 
-            {/* Card Content */}
-            <div className="card border-0 shadow-sm p-4" style={{ width: "100%", maxWidth: "450px", borderRadius: "15px" }}>
-                <h2 className="text-center mb-4 fw-bold" style={{ color: primaryBlue }}>
-                    {step === 1 ? "Quên mật khẩu" : step === 2 ? "Xác thực OTP" : "Mật khẩu mới"}
+                /* NÚT BẤM ĐỒNG NHẤT: MẶC ĐỊNH XÁM - HOVER ĐỎ */
+                .btn-action { 
+                    background-color: #6c757d; 
+                    color: white; 
+                    font-weight: 700; 
+                    padding: 12px; 
+                    border-radius: 10px; 
+                    border: none; 
+                    margin-top: 10px; 
+                    text-transform: uppercase; 
+                    width: 100%;
+                    transition: all 0.3s ease; 
+                }
+                .btn-action:hover { 
+                    background-color: #e31b23; 
+                    transform: translateY(-2px); 
+                    box-shadow: 0 5px 15px rgba(227, 27, 35, 0.3);
+                }
+                .btn-action:disabled { background-color: #ccc; transform: none; box-shadow: none; }
+
+                .otp-input { height: 50px; width: 50px; text-align: center; font-weight: bold; font-size: 20px; border: 1px solid #ddd; border-radius: 8px; transition: all 0.3s; }
+                .otp-input:focus { border-color: #005294; box-shadow: 0 0 5px rgba(0,82,148,0.2); outline: none; }
+            `}</style>
+
+            <div className="forgot-card">
+                <h2 className="forgot-title">
+                    {step === 1 ? "Quên mật khẩu" : step === 2 ? "Xác thực mã OTP" : "Đặt lại mật khẩu"}
                 </h2>
 
-                {error && <div className="alert alert-danger py-2 small">{error}</div>}
-                {success && <div className="alert alert-success py-2 small">{success}</div>}
+                {error && <div className="alert alert-danger py-2 small text-center">{error}</div>}
+                {success && <div className="alert alert-success py-2 small text-center">{success}</div>}
 
-                {/* STEP 1: NHẬP EMAIL */}
+                {/* BƯỚC 1: NHẬP EMAIL */}
                 {step === 1 && (
                     <form onSubmit={sendOtp}>
-                        <div className="mb-4">
-                            <label className="form-label small fw-bold">Email đăng ký <span className="text-danger">*</span></label>
+                        <div className="form-group-custom">
+                            <label>Email đăng ký <span>*</span></label>
                             <input
                                 type="email"
-                                className="form-control border-0 border-bottom rounded-0 px-0 shadow-none"
+                                className="input-underline"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="example@gmail.com"
                                 required
                             />
+                            <Mail size={18} className="field-icon" />
                         </div>
-                        <button 
-                            className="btn w-100 fw-bold text-white py-2 mb-3" 
-                            style={{ backgroundColor: primaryRed, borderRadius: "10px" }}
-                            disabled={loading}
-                        >
-                            {loading ? "ĐANG GỬI..." : "GỬI MÃ ĐẶT LẠI"}
+                        <button type="submit" className="btn-action" disabled={loading}>
+                            {loading ? "ĐANG GỬI..." : "GỬI MÃ XÁC THỰC"}
                         </button>
                     </form>
                 )}
 
-                {/* STEP 2: NHẬP OTP */}
+                {/* BƯỚC 2: NHẬP OTP */}
                 {step === 2 && (
                     <form onSubmit={verifyOtp}>
                         <p className="text-center small text-muted mb-4">
@@ -129,8 +159,7 @@ function ForgotPassword() {
                                     key={index}
                                     type="text"
                                     maxLength="1"
-                                    className="form-control text-center fw-bold"
-                                    style={{ height: "50px", borderRadius: "8px" }}
+                                    className="otp-input"
                                     value={d}
                                     onChange={(e) => handleChangeOtp(e.target, index)}
                                     onKeyDown={(e) => handleKeyDown(e, index)}
@@ -139,54 +168,51 @@ function ForgotPassword() {
                                 />
                             ))}
                         </div>
-                        <button 
-                            className="btn w-100 fw-bold text-white py-2" 
-                            style={{ backgroundColor: primaryBlue, borderRadius: "10px" }}
-                        >
-                            XÁC THỰC MÃ
-                        </button>
+                        <button type="submit" className="btn-action">XÁC THỰC OTP</button>
+                        <div className="text-center mt-3">
+                            <button type="button" className="btn btn-link btn-sm text-decoration-none" onClick={() => setStep(1)}>
+                                Thay đổi email?
+                            </button>
+                        </div>
                     </form>
                 )}
 
-                {/* STEP 3: NHẬP PASSWORD MỚI */}
+                {/* BƯỚC 3: MẬT KHẨU MỚI */}
                 {step === 3 && (
                     <form onSubmit={resetPassword}>
-                        <div className="mb-3">
-                            <label className="form-label small fw-bold">Mật khẩu mới <span className="text-danger">*</span></label>
+                        <div className="form-group-custom">
+                            <label>Mật khẩu mới <span>*</span></label>
                             <input
                                 type="password"
-                                className="form-control border-0 border-bottom rounded-0 px-0 shadow-none"
+                                className="input-underline"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                placeholder="Nhập mật khẩu mới"
+                                placeholder="Tối thiểu 6 ký tự"
                                 required
                             />
+                            <Lock size={18} className="field-icon" />
                         </div>
-                        <div className="mb-4">
-                            <label className="form-label small fw-bold">Xác nhận mật khẩu <span className="text-danger">*</span></label>
+                        <div className="form-group-custom">
+                            <label>Xác nhận mật khẩu <span>*</span></label>
                             <input
                                 type="password"
-                                className="form-control border-0 border-bottom rounded-0 px-0 shadow-none"
+                                className="input-underline"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Nhập lại mật khẩu"
+                                placeholder="Nhập lại mật khẩu mới"
                                 required
                             />
+                            <ShieldCheck size={18} className="field-icon" />
                         </div>
-                        <button 
-                            className="btn w-100 fw-bold text-white py-2" 
-                            style={{ backgroundColor: "#28a745", borderRadius: "10px" }}
-                            disabled={loading}
-                        >
+                        <button type="submit" className="btn-action" disabled={loading}>
                             {loading ? "ĐANG CẬP NHẬT..." : "ĐẶT LẠI MẬT KHẨU"}
                         </button>
                     </form>
                 )}
 
                 <div className="text-center mt-4">
-                    <span className="small text-muted">Quay lại trang </span>
-                    <Link to="/login" className="small fw-bold text-decoration-none" style={{ color: primaryBlue }}>
-                        Đăng nhập
+                    <Link to="/login" className="text-decoration-none small fw-bold text-muted d-flex align-items-center justify-content-center">
+                        <ArrowLeft size={16} className="me-1" /> Quay lại Đăng nhập
                     </Link>
                 </div>
             </div>

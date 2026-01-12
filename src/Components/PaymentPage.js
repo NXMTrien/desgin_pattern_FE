@@ -16,21 +16,16 @@ const PaymentPage = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  // Tách hàm fetch ra để dùng lại sau khi hủy thành công
   const fetchBookings = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_URL}/bookings/my-bookings`, {
         headers: getAuthHeaders(),
       });
-
       const all = res.data.data.bookings || [];
-
-      // Chỉ lấy booking chờ thanh toán hoặc chờ xác nhận
       const pending = all.filter((b) =>
         ["pending_payment", "pending", "awaiting_confirmation"].includes(b.status)
       );
-
       setBookings(pending);
     } catch (err) {
       console.error("Error loading bookings:", err);
@@ -48,7 +43,6 @@ const PaymentPage = () => {
     navigate(`/checkout/${id}`);
   };
 
-  // --- HÀM HỦY BOOKING (MỚI) ---
   const handleCancel = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn hủy đặt tour này không?")) {
       try {
@@ -56,7 +50,7 @@ const PaymentPage = () => {
           headers: getAuthHeaders(),
         });
         alert("Hủy tour thành công! Email thông báo đã được gửi.");
-        fetchBookings(); // Tải lại danh sách
+        fetchBookings();
       } catch (err) {
         console.error("Lỗi khi hủy tour:", err);
         alert(err.response?.data?.message || "Không thể hủy tour lúc này.");
@@ -75,6 +69,33 @@ const PaymentPage = () => {
 
   return (
     <Container className="my-4">
+      {/* CSS CUSTOM CHO NÚT */}
+      <style>{`
+        .btn-silver {
+          background-color: #e0e0e0;
+          border: 1px solid #c0c0c0;
+          color: #555;
+          transition: all 0.3s ease;
+          font-weight: 500;
+        }
+
+        .btn-pay-hover:hover {
+          background-color: #28a745 !important; /* Màu xanh success */
+          border-color: #28a745 !important;
+          color: white !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-cancel-hover:hover {
+          background-color: #dc3545 !important; /* Màu đỏ danger */
+          border-color: #dc3545 !important;
+          color: white !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+      `}</style>
+
       <h2 className="text-center fw-bold mb-4">💳 Danh Sách Tour Cần Thanh Toán</h2>
 
       {message && <Alert variant="danger">{message}</Alert>}
@@ -84,7 +105,7 @@ const PaymentPage = () => {
           Bạn không có tour nào cần thanh toán.
         </Alert>
       ) : (
-        <Table striped bordered hover responsive className="shadow-sm">
+        <Table striped bordered hover responsive className="shadow-sm align-middle">
           <thead className="table-dark">
             <tr>
               <th>#</th>
@@ -93,7 +114,7 @@ const PaymentPage = () => {
               <th>Số Người</th>
               <th>Tổng Tiền</th>
               <th>Trạng Thái</th>
-              <th>Thao Tác</th>
+              <th style={{ width: "250px" }}>Thao Tác</th>
             </tr>
           </thead>
 
@@ -101,10 +122,10 @@ const PaymentPage = () => {
             {bookings.map((b, index) => (
               <tr key={b._id}>
                 <td>{index + 1}</td>
-                <td>{b.tour?.title || "Tour Tùy Chọn"}</td>
+                <td className="fw-bold">{b.tour?.title || "Tour Tùy Chọn"}</td>
                 <td>{new Date(b.startDate).toLocaleDateString()}</td>
                 <td>{b.numberOfPeople}</td>
-                <td>{b.totalPrice?.toLocaleString()} VNĐ</td>
+                <td className="text-primary fw-bold">{b.totalPrice?.toLocaleString()} VNĐ</td>
                 <td>
                   {b.status === 'awaiting_confirmation' && (
                     <span className="badge bg-info text-dark">⏳ Chờ xác nhận</span>
@@ -116,29 +137,24 @@ const PaymentPage = () => {
 
                 <td>
                   {b.status === 'awaiting_confirmation' ? (
-                    /* CHỈ HIỂN THỊ NÚT KHÓA KHI ĐANG XÁC NHẬN */
-                    <Button variant="secondary" className="w-100" disabled>
+                    <Button variant="secondary" className="w-100 opacity-50" disabled>
                       Đang chờ xác nhận
                     </Button>
                   ) : (
-                    /* HIỂN THỊ CẢ 2 NÚT KHI TRẠNG THÁI CHỜ THANH TOÁN */
-                   /* HIỂN THỊ 2 NÚT NẰM NGANG NHAU */
-    <div className="d-flex gap-2">
-      <Button
-        variant="success"
-        className="flex-fill"
-        onClick={() => handlePayment(b._id)}
-      >
-        Thanh Toán
-      </Button>
-      <Button
-        variant="danger"
-        className="flex-fill"
-        onClick={() => handleCancel(b._id)}
-      >
-        Hủy Tour
-      </Button>
-    </div>
+                    <div className="d-flex gap-2">
+                      <Button
+                        className="btn-silver btn-pay-hover flex-fill"
+                        onClick={() => handlePayment(b._id)}
+                      >
+                        Thanh Toán
+                      </Button>
+                      <Button
+                        className="btn-silver btn-cancel-hover flex-fill"
+                        onClick={() => handleCancel(b._id)}
+                      >
+                        Hủy Tour
+                      </Button>
+                    </div>
                   )}
                 </td>
               </tr>

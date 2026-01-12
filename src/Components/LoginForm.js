@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Eye, EyeOff,  } from 'lucide-react'; 
+import { Eye, EyeOff } from 'lucide-react'; 
 import { GoogleLogin } from '@react-oauth/google';
 
 function LoginForm() {
@@ -25,23 +25,23 @@ function LoginForm() {
       setError("Sai email hoặc mật khẩu!");
     }
   };
+
   const onGoogleSuccess = async (credentialResponse) => {
     try {
       const res = await axios.post("http://localhost:5000/api/auth/google-login", {
-        idToken: credentialResponse.credential // Gửi token Google về Backend
+        idToken: credentialResponse.credential 
       });
       handleLoginSuccess(res.data);
     } catch (err) {
       setError("Đăng nhập Google thất bại. Vui lòng thử lại!");
     }
   };
+
   const handleLoginSuccess = (data) => {
     if (data && data.token) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("username", data.username);
-      
-      // Logic phân quyền của bạn
       data.role === "001" ? navigate("/admin_register") : navigate("/");
     }
   };
@@ -59,14 +59,29 @@ function LoginForm() {
         .input-underline { border: none; border-bottom: 1.5px solid #ccc; border-radius: 0; padding: 10px 0; width: 100%; outline: none; transition: border-color 0.3s; }
         .input-underline:focus { border-bottom-color: #005294; }
         .password-toggle { position: absolute; right: 0; bottom: 10px; cursor: pointer; color: #666; }
-        .btn-vietravel { background-color: #e31b23; color: white; font-weight: 700; padding: 12px; border-radius: 10px; border: none; margin-top: 10px; text-transform: uppercase; transition: 0.3s; }
-        .btn-vietravel:hover { background-color: #c41219; transform: translateY(-2px); }
-        /* Style cho nút Google để nó rộng 100% */
+        
+        /* CẬP NHẬT MÀU NÚT: MẶC ĐỊNH XÁM - HOVER ĐỎ */
+        .btn-vietravel { 
+          background-color: #6c757d; 
+          color: white; 
+          font-weight: 700; 
+          padding: 12px; 
+          border-radius: 10px; 
+          border: none; 
+          margin-top: 10px; 
+          text-transform: uppercase; 
+          transition: all 0.3s ease; 
+        }
+        .btn-vietravel:hover { 
+          background-color: #e31b23; 
+          transform: translateY(-2px); 
+          box-shadow: 0 5px 15px rgba(227, 27, 35, 0.3);
+        }
+
         .google-btn-container { display: flex; justify-content: center; margin-top: 10px; width: 100%; }
       `}</style>
 
       <div className="login-card">
-        {/* Logo Vietravel có thể thêm ở đây */}
         <h2 className="login-title">Đăng nhập</h2>
 
         {error && <div className="alert alert-danger py-2 small text-center">{error}</div>}
@@ -108,7 +123,6 @@ function LoginForm() {
 
         <div className="text-center my-3 text-muted small">Hoặc</div>
 
-        {/* NÚT ĐĂNG NHẬP GOOGLE MỚI */}
         <div className="google-btn-container">
           <GoogleLogin
             onSuccess={onGoogleSuccess}

@@ -1,25 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Form, Alert, Card,Modal } from 'react-bootstrap';
-import { MapPin, Clock, Users, DollarSign, BookOpen, Star, MessageSquare } from 'lucide-react';
+import { Button, Form, Alert, Card, Modal } from 'react-bootstrap';
+import { MapPin, Clock, Users, BookOpen, Star, MessageSquare } from 'lucide-react';
 
-// --- COMPONENT ĐÁNH GIÁ (MỚI) ---
+// --- COMPONENT ĐÁNH GIÁ ---
 const ReviewSection = ({ tourId }) => {
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    
 
     const fetchReviews = async () => {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.get(
-            `http://localhost:5000/api/tours/${tourId}/reviews`,
-            { headers: { Authorization: `Bearer ${token}` } } 
-        );
+                `http://localhost:5000/api/tours/${tourId}/reviews`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             setReviews(res.data.data.reviews || []);
         } catch (err) {
             console.error("Lỗi lấy đánh giá:", err);
@@ -46,7 +45,7 @@ const ReviewSection = ({ tourId }) => {
             );
             setComment("");
             setRating(5);
-            fetchReviews(); // Load lại danh sách
+            fetchReviews();
             alert("✅ Cảm ơn bạn đã đánh giá!");
         } catch (err) {
             setError(err.response?.data?.message || "❌ Gửi đánh giá thất bại.");
@@ -61,12 +60,10 @@ const ReviewSection = ({ tourId }) => {
                 <MessageSquare className="me-2 text-primary" /> Đánh giá từ khách hàng ({reviews.length})
             </h3>
 
-            {/* Form viết đánh giá */}
             <Card className="mb-5 shadow-sm border-0 bg-light">
                 <Card.Body className="p-4">
                     <h5 className="fw-bold mb-3">Viết đánh giá của bạn</h5>
                     {error && <Alert variant="danger" className="py-2">{error}</Alert>}
-                    
                     <Form onSubmit={handleSubmitReview}>
                         <Form.Group className="mb-3">
                             <Form.Label className="d-block">Bạn chấm tour này mấy sao?</Form.Label>
@@ -83,7 +80,6 @@ const ReviewSection = ({ tourId }) => {
                                 ))}
                             </div>
                         </Form.Group>
-
                         <Form.Group className="mb-3">
                             <Form.Control
                                 as="textarea"
@@ -94,7 +90,6 @@ const ReviewSection = ({ tourId }) => {
                                 className="border-0 shadow-sm"
                             />
                         </Form.Group>
-
                         <Button variant="primary" type="submit" disabled={loading} className="px-4 fw-bold">
                             {loading ? "Đang gửi..." : "Gửi đánh giá"}
                         </Button>
@@ -102,7 +97,6 @@ const ReviewSection = ({ tourId }) => {
                 </Card.Body>
             </Card>
 
-            {/* Danh sách hiển thị các đánh giá */}
             <div className="review-list">
                 {reviews.length === 0 ? (
                     <Alert variant="info">Chưa có đánh giá nào. Hãy là người đầu tiên!</Alert>
@@ -111,16 +105,16 @@ const ReviewSection = ({ tourId }) => {
                         <div key={rev._id} className="mb-4 p-3 bg-white rounded shadow-sm border">
                             <div className="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <div className="fw-bold text-primary" style={{fontSize: '1.1rem'}}>
+                                    <div className="fw-bold text-primary" style={{ fontSize: '1.1rem' }}>
                                         {rev.user?.username || "Người dùng ẩn danh"}
                                     </div>
                                     <div className="d-flex my-1">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star 
-                                                key={i} 
-                                                size={14} 
-                                                fill={i < rev.rating ? "#ffc107" : "none"} 
-                                                color={i < rev.rating ? "#ffc107" : "#ccc"} 
+                                            <Star
+                                                key={i}
+                                                size={14}
+                                                fill={i < rev.rating ? "#ffc107" : "none"}
+                                                color={i < rev.rating ? "#ffc107" : "#ccc"}
                                             />
                                         ))}
                                     </div>
@@ -140,24 +134,56 @@ const ReviewSection = ({ tourId }) => {
     );
 };
 
-// --- COMPONENT BLOG ---
+// --- COMPONENT BLOG (CHỈ ÁP DỤNG ĐỊNH DẠNG "NGÀY" CHO PHẦN ATTRACTIONS) ---
 const BlogContent = ({ blog }) => {
     if (!blog || !blog.description) return <Alert variant="warning">Chưa có nội dung Blog chi tiết cho Tour này.</Alert>;
 
+    // Hàm này chỉ được dùng cho blog.description.attractions
+    const renderFormattedAttractions = (text) => {
+        if (!text) return null;
+        const parts = text.split(/(?=Ngày \d+)/g);
+
+        return parts.map((part, index) => {
+            const lines = part.trim().split('\n');
+            const firstLine = lines[0];
+            const restOfText = lines.slice(1).join('\n');
+
+            if (firstLine.startsWith("Ngày")) {
+                return (
+                    <div key={index} className="mb-4">
+                        <h4 className="text-primary fw-bold mt-3 border-bottom pb-2">
+                            📍 {firstLine}
+                        </h4>
+                        <p style={{ whiteSpace: 'pre-wrap' }} className="ps-3 text-secondary">
+                            {restOfText}
+                        </p>
+                    </div>
+                );
+            }
+            return <p key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</p>;
+        });
+    };
+
     return (
-        <div className="mt-5 p-4 border rounded bg-light">
-            <h3 className="text-primary"><BookOpen className="inline-block mr-2" /> {blog.title}</h3>
+        <div className="mt-5 p-4 border rounded bg-white shadow-sm">
+            <h3 className="text-primary fw-bold mb-4 d-flex align-items-center">
+                <BookOpen className="me-2" /> {blog.title}
+            </h3>
             <hr />
-            <h5 className="mt-4 text-secondary">Chi tiết Tour</h5>
-            <div className="p-3 border rounded bg-white">
+            
+            <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded">📋 Chi tiết Tour</h5>
+            <div className="p-3 mb-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.detail}</p>
             </div>
-            <h5 className="mt-4 text-secondary">Điểm tham quan nổi bật</h5>
-            <div className="p-3 border rounded bg-white">
-                <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.attractions}</p>
+
+            {/* CHỈ PHẦN NÀY LÀ CÓ H1/H4 NỔI BẬT "NGÀY" */}
+            <h5 className="mt-4 fw-bold text-primary bg-primary bg-opacity-10 p-2 rounded">📸 Điểm tham quan nổi bật</h5>
+            <div className="p-3 mb-3">
+                {renderFormattedAttractions(blog.description.attractions)}
             </div>
-            <h5 className="mt-4 text-secondary">Sơ lược để chuyến đi thêm phần ý nghĩ hơn</h5>
-            <div className="p-3 border rounded bg-white">
+
+            <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded">💡 Sơ lược để chuyến đi ý nghĩa</h5>
+            <div className="p-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.meaningful_description}</p>
             </div>
         </div>
@@ -183,7 +209,7 @@ const TourDetail = () => {
                 const data = res.data.data.tour;
                 setTour(data);
                 setMainImage(`http://localhost:5000/img/tours/${data.imageCover}`);
-                fetchBlog(data._id); 
+                fetchBlog(data._id);
             } catch (err) {
                 setErrors("Không thể tải thông tin Tour.");
             }
@@ -193,10 +219,10 @@ const TourDetail = () => {
 
     const fetchBlog = async (tourId) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/blogs/by-tour/${tourId}`); 
-            setBlog(res.data.data.blog); 
+            const res = await axios.get(`http://localhost:5000/api/blogs/by-tour/${tourId}`);
+            setBlog(res.data.data.blog);
         } catch (err) {
-            setBlog(null); 
+            setBlog(null);
         }
     };
 
@@ -223,9 +249,9 @@ const TourDetail = () => {
     const handleConfirmBooking = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
-        setShowLoginModal(true); 
-        return;
-    }
+            setShowLoginModal(true);
+            return;
+        }
         if (!form.numberOfPeople || !form.startDate) {
             return setErrors("⚠️ Vui lòng nhập đầy đủ Số người và Ngày khởi hành!");
         }
@@ -256,16 +282,15 @@ const TourDetail = () => {
     return (
         <div className="container py-4">
             <h2 className="mb-4 text-center fw-bold text-primary">{tour.title}</h2>
-            
+
             <div className="d-flex justify-content-center gap-4 mb-4 text-muted">
-                <span className="d-flex align-items-center"><MapPin className="h-4 w-4 me-1"/> {tour.destination}</span>
-                <span className="d-flex align-items-center"><Clock className="h-4 w-4 me-1"/> {tour.duration} ngày</span>
-                <span className="d-flex align-items-center"><Users className="h-4 w-4 me-1"/> Tối đa: {tour.maxGroupSize}</span>
+                <span className="d-flex align-items-center"><MapPin className="h-4 w-4 me-1" /> {tour.destination}</span>
+                <span className="d-flex align-items-center"><Clock className="h-4 w-4 me-1" /> {tour.duration} ngày</span>
+                <span className="d-flex align-items-center"><Users className="h-4 w-4 me-1" /> Tối đa: {tour.maxGroupSize}</span>
             </div>
 
             <div className="row">
                 <div className="col-md-8">
-                    {/* Ảnh chính */}
                     <img
                         src={mainImage}
                         className="img-fluid rounded mb-3 shadow-sm"
@@ -273,7 +298,6 @@ const TourDetail = () => {
                         alt="Main Cover"
                     />
 
-                    {/* Thumbnail */}
                     <div className="d-flex gap-2 mb-4">
                         {images.slice(0, 5).map((img, index) => (
                             <img
@@ -290,14 +314,10 @@ const TourDetail = () => {
                         ))}
                     </div>
 
-                    {/* Blog chi tiết */}
                     <BlogContent blog={blog} />
-
-                    {/* PHẦN ĐÁNH GIÁ ĐẶT TẠI ĐÂY */}
                     <ReviewSection tourId={id} />
                 </div>
 
-                {/* Form đặt tour bên phải */}
                 <div className="col-md-4">
                     <div className="p-4 border rounded shadow-lg bg-white sticky-top" style={{ top: '80px', zIndex: '10' }}>
                         <h4 className="text-center mb-3">Đặt Tour Ngay</h4>
@@ -307,35 +327,36 @@ const TourDetail = () => {
                             </span>
                             <span className="text-muted"> / người</span>
                         </div>
+
                         <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
-    <Modal.Body className="text-center p-5">
-        <div className="mb-4">
-            <Star size={60} className="text-warning mb-2" fill="#ffc107" />
-            <div style={{fontSize: '50px', marginTop: '-40px'}}>🔑</div>
-        </div>
-        <h4 className="fw-bold text-dark">Yêu cầu đăng nhập</h4>
-        <p className="text-muted">
-            Bạn cần đăng nhập tài khoản để thực hiện chức năng đặt tour và quản lý chuyến đi của mình.
-        </p>
-        <div className="d-grid gap-2 mt-4">
-            <Button 
-                variant="primary" 
-                size="lg" 
-                className="fw-bold" 
-                onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
-            >
-                Đăng nhập ngay
-            </Button>
-            <Button 
-                variant="link" 
-                className="text-secondary" 
-                onClick={() => setShowLoginModal(false)}
-            >
-                Để sau
-            </Button>
-        </div>
-    </Modal.Body>
-</Modal>
+                            <Modal.Body className="text-center p-5">
+                                <div className="mb-4">
+                                    <Star size={60} className="text-warning mb-2" fill="#ffc107" />
+                                    <div style={{ fontSize: '50px', marginTop: '-40px' }}>🔑</div>
+                                </div>
+                                <h4 className="fw-bold text-dark">Yêu cầu đăng nhập</h4>
+                                <p className="text-muted">
+                                    Bạn cần đăng nhập tài khoản để thực hiện chức năng đặt tour và quản lý chuyến đi của mình.
+                                </p>
+                                <div className="d-grid gap-2 mt-4">
+                                    <Button
+                                        variant="primary"
+                                        size="lg"
+                                        className="fw-bold"
+                                        onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
+                                    >
+                                        Đăng nhập ngay
+                                    </Button>
+                                    <Button
+                                        variant="link"
+                                        className="text-secondary"
+                                        onClick={() => setShowLoginModal(false)}
+                                    >
+                                        Để sau
+                                    </Button>
+                                </div>
+                            </Modal.Body>
+                        </Modal>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Số người</Form.Label>
@@ -368,7 +389,11 @@ const TourDetail = () => {
 
                         {errors && <Alert variant="danger" className="mt-3 py-2 small">{errors}</Alert>}
 
-                        <Button className="w-100 btn-lg fw-bold" variant="success" onClick={handleConfirmBooking}>
+                      <Button 
+                            className="w-100 btn-lg fw-bold" 
+                            variant="primary" 
+                            onClick={handleConfirmBooking}
+                        >
                             Xác Nhận Đặt Tour
                         </Button>
                     </div>
