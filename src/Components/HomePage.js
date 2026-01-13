@@ -20,27 +20,172 @@ export default function HomePage() {
       note: "Lào Cai sở hữu thị trấn Sapa mờ sương với đỉnh Fansipan - nóc nhà Đông Dương huyền thoại. Những thửa ruộng bậc thang tại thung lũng Mường Hoa đã trở thành biểu tượng du lịch vùng cao với vẻ đẹp rực rỡ mùa lúa chín. Du khách đến đây không chỉ để chinh phục thiên nhiên mà còn để trải nghiệm bản sắc văn hóa độc đáo của người H'Mông, người Dao tại các bản làng. Sapa luôn mang lại cảm giác bình yên, lãng mạn và sự thư thái tuyệt vời." },
     { id: 4, category: "Miền Bắc", name: "NINH BÌNH", size: "small", img: "https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/%E1%BA%A3nh%20%C4%91%E1%BA%B9p%20ninh%20b%C3%ACnh/anh-dep-ninh-binh-3.jpg", 
       note: "Ninh Bình được ví như 'Hạ Long trên cạn' với quần thể danh thắng Tràng An và Tam Cốc rực rỡ. Ngồi trên thuyền nhỏ lướt trên dòng sông Ngô Đồng, du khách sẽ được chiêm ngưỡng những dãy núi đá vôi sừng sững và những hang động kỳ ảo. Ngoài ra, Cố đô Hoa Lư và chùa Bái Đính còn mang lại những giá trị lịch sử, tâm linh sâu sắc. Ninh Bình là sự kết hợp hoàn hảo giữa vẻ đẹp thiên nhiên yên bình và những dấu ấn văn hóa nghìn năm." },
-    // { id: 5, category: "Miền Bắc", name: "YÊN BÁI", size: "small", img: "https://nads.1cdn.vn/2024/07/12/yby1.jpg", 
-    //   note: "Yên Bái nổi tiếng với Mù Cang Chải, nơi có những thửa ruộng bậc thang kỳ vĩ nhất Việt Nam. Mỗi mùa lúa chín, cả vùng đồi núi nhuộm một màu vàng óng ả, thu hút hàng ngàn nhiếp ảnh gia và những người yêu thiên nhiên. Đèo Khau Phạ với những làn mây bồng bềnh là địa điểm lý tưởng cho những ai thích chinh phục. Yên Bái còn có hồ Thác Bà xanh mát và những đồi chè cổ thụ Suối Giàng hàng trăm năm tuổi, tạo nên một hành trình khám phá đầy màu sắc." },
+   { id: 5, category: "Miền Bắc", name: "TUYÊN QUANG", size: "tall",
+  img: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Na_Hang_lake.jpg",
+  note: "Tuyên Quang là tỉnh mới được hình thành từ Hà Giang và Tuyên Quang, nổi bật với cao nguyên đá hùng vĩ, hồ sinh thái Na Hang và những cung đường đèo ngoạn mục. Vùng đất này mang vẻ đẹp nguyên sơ của núi rừng Đông Bắc, kết hợp bản sắc văn hóa độc đáo của các dân tộc vùng cao."
+},
+
+{ id: 6, category: "Miền Bắc", name: "THÁI NGUYÊN", size: "small",
+  img: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Che_Tan_Cuong.jpg",
+  note: "Thái Nguyên được sáp nhập từ Bắc Kạn và Thái Nguyên, là trung tâm kinh tế – giáo dục vùng trung du miền núi phía Bắc. Nơi đây nổi tiếng với chè Tân Cương, núi rừng xanh mát và nhiều di tích lịch sử cách mạng."
+},
+
+{ id: 7, category: "Miền Bắc", name: "PHÚ THỌ", size: "large",
+  img: "https://upload.wikimedia.org/wikipedia/commons/5/56/Den_Hung.jpg",
+  note: "Phú Thọ mới được hình thành từ Vĩnh Phúc, Phú Thọ và Hòa Bình, là vùng đất cội nguồn dân tộc Việt Nam. Nổi bật với Đền Hùng linh thiêng, hồ thủy điện Hòa Bình và những thung lũng xanh mát, nơi đây kết hợp hài hòa giữa văn hóa – lịch sử – thiên nhiên."
+},
+
+{ id: 8, category: "Miền Bắc", name: "BẮC NINH", size: "small",
+  img: "https://upload.wikimedia.org/wikipedia/commons/4/47/Lim_festival.jpg",
+  note: "Bắc Ninh được sáp nhập từ Bắc Giang và Bắc Ninh, là trung tâm công nghiệp – văn hóa lớn của miền Bắc. Đây là cái nôi của dân ca Quan họ, mang đậm nét văn hóa Kinh Bắc truyền thống xen lẫn sự phát triển hiện đại."
+},
+
+{ id: 9, category: "Miền Bắc", name: "HƯNG YÊN", size: "large",
+  img: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Pho_Hien.jpg",
+  note: "Hưng Yên mới được hợp nhất từ Hưng Yên và Thái Bình, nổi bật với vùng đồng bằng trù phú, Phố Hiến cổ kính và những làng quê Bắc Bộ yên bình. Đây là khu vực phát triển mạnh về nông nghiệp và công nghiệp nhẹ."
+},
+
+{ id: 10, category: "Miền Bắc", name: "HÀ NỘI", size: "wide",
+  img: "https://upload.wikimedia.org/wikipedia/commons/6/65/Hoan_Kiem_Lake.jpg",
+  note: "Hà Nội là thủ đô của Việt Nam, trung tâm chính trị – văn hóa – giáo dục của cả nước. Thành phố mang vẻ đẹp giao thoa giữa lịch sử ngàn năm và nhịp sống hiện đại."
+},
+
+{ id: 11, category: "Miền Bắc", name: "HẢI PHÒNG", size: "wide",
+  img: "https://upload.wikimedia.org/wikipedia/commons/0/09/Cat_Ba_island.jpg",
+  note: "Hải Phòng là thành phố cảng lớn của miền Bắc, nổi tiếng với đảo Cát Bà, vịnh Lan Hạ và nền kinh tế biển phát triển năng động."
+},
 
     // MIỀN TRUNG
-    { id: 6, category: "Miền Trung", name: "ĐÀ NẴNG", size: "large", img: "https://vcdn1-dulich.vnecdn.net/2022/06/03/cauvang-1654247842-9403-1654247849.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=Swd6JjpStebEzT6WARcoOA", 
-      note: "Đà Nẵng là thành phố đáng sống nhất Việt Nam với sự kết hợp hài hòa giữa biển Mỹ Khê quyến rũ và núi Bà Nà mây phủ. Biểu tượng Cầu Vàng được nâng đỡ bởi đôi bàn tay khổng lồ đã trở thành điểm đến thu hút du khách toàn thế giới. Thành phố còn nổi tiếng với những cây cầu hiện đại, bán đảo Sơn Trà hoang sơ và Ngũ Hành Sơn kỳ bí. Với dịch vụ chuyên nghiệp và con người thân thiện, Đà Nẵng luôn mang lại những trải nghiệm du lịch hiện đại và đẳng cấp." },
-    { id: 7, category: "Miền Trung", name: "HỘI AN", size: "tall", img: "https://images.vietnamtourism.gov.vn/vn/images/2023/thang_6/11125-quang_nam-huybank%40gmail.com-hoi_an_ve_dem_-1.jpg", 
-      note: "Phố cổ Hội An mang vẻ đẹp hoài cổ với những ngôi nhà tường vàng rêu phong và ánh đèn lồng rực rỡ về đêm. Dòng sông Hoài thơ mộng là nơi du khách có thể thả hoa đăng cầu may mắn. Hội An không chỉ có kiến trúc độc đáo mà còn có nền ẩm thực tinh tế với Cao Lầu, cơm gà nổi tiếng. Sự bình lặng, chậm rãi của nhịp sống nơi đây giúp du khách quên đi những lo toan hối hả của đời thường, tìm lại sự an yên trong tâm hồn." },
-    { id: 8, category: "Miền Trung", name: "HUẾ", size: "small", img: "https://images.vietnamtourism.gov.vn/vn//images/2022/thang_6/1206.thuathienhue2.jpg", 
-      note: "Cố đô Huế là biểu tượng của vẻ đẹp cung đình và nét thanh lịch cổ kính. Đại Nội Huế cùng hệ thống lăng tẩm triều Nguyễn dọc sông Hương tạo nên một không gian lịch sử trầm mặc. Nghe ca Huế trên thuyền rồng và thưởng thức ẩm thực cung đình là những trải nghiệm khó quên. Huế mang trong mình sự dịu dàng và tinh tế, là điểm đến không thể bỏ qua cho những ai yêu thích tìm hiểu về văn hóa, lịch sử dân tộc." },
-    { id: 9, category: "Miền Trung", name: "NHA TRANG", size: "small", img: "https://letsflytravel.vn/wp-content/uploads/2024/08/nha-trang-2.webp", 
-      note: "Nha Trang sở hữu một trong những vịnh biển đẹp nhất thế giới với làn nước trong xanh và bãi cát trắng mịn màng. Đây là thiên đường cho các môn thể thao nước như lặn ngắm san hô tại Hòn Mun hay tham gia các trò chơi cảm giác mạnh tại VinWonders. Tháp Bà Ponagar cổ kính cũng là một điểm dừng chân mang đậm giá trị văn hóa Chăm Pa. Nha Trang hội tụ đủ các yếu tố từ thiên nhiên biển đảo đến dịch vụ nghỉ dưỡng cao cấp." },
+    { id: 12, category: "Miền Trung", name: "THANH HÓA", size: "large",
+  img: "https://upload.wikimedia.org/wikipedia/commons/5/55/Sam_Son_Beach.jpg",
+  note: "Thanh Hóa là vùng đất giao thoa giữa Bắc và Trung Bộ, nổi bật với biển Sầm Sơn, suối cá Cẩm Lương và Thành Nhà Hồ – di sản văn hóa thế giới. Nơi đây vừa mang vẻ đẹp thiên nhiên đa dạng vừa đậm dấu ấn lịch sử lâu đời."
+},
+
+{ id: 13, category: "Miền Trung", name: "NGHỆ AN", size: "tall",
+  img: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Cua_Lo_beach.jpg",
+  note: "Nghệ An là quê hương Chủ tịch Hồ Chí Minh, nổi tiếng với biển Cửa Lò, rừng quốc gia Pù Mát và những làng quê xứ Nghệ mộc mạc."
+},
+
+{ id: 14, category: "Miền Trung", name: "HÀ TĨNH", size: "small",
+  img: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Thien_Cam_Beach.jpg",
+  note: "Hà Tĩnh gây ấn tượng với biển Thiên Cầm hoang sơ, núi Hồng Lĩnh hùng vĩ và những giá trị văn hóa dân gian đặc sắc."
+},
+
+{ id: 15, category: "Miền Trung", name: "QUẢNG TRỊ", size: "small",
+  img: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Vinh_Moc_Tunnels.jpg",
+  note: "Quảng Trị là vùng đất lịch sử gắn liền với cầu Hiền Lương – sông Bến Hải và địa đạo Vịnh Mốc."
+},
+
+{ id: 16, category: "Miền Trung", name: "HUẾ", size: "wide",
+  img: "https://images.vietnamtourism.gov.vn/vn//images/2022/thang_6/1206.thuathienhue2.jpg",
+  note: "Cố đô Huế mang vẻ đẹp cung đình cổ kính với Đại Nội, lăng tẩm triều Nguyễn và sông Hương thơ mộng."
+},
+
+{ id: 17, category: "Miền Trung", name: "ĐÀ NẴNG", size: "wide",
+  img: "https://vcdn1-dulich.vnecdn.net/2022/06/03/cauvang-1654247842-9403-1654247849.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=Swd6JjpStebEzT6WARcoOA",
+  note: "Đà Nẵng là thành phố đáng sống với biển Mỹ Khê, Bà Nà Hills và Cầu Vàng nổi tiếng thế giới."
+},
+
+{ id: 18, category: "Miền Trung", name: "QUẢNG NGÃI", size: "large",
+  img: "https://upload.wikimedia.org/wikipedia/commons/6/6c/Ly_Son_Island.jpg",
+  note: "Quảng Ngãi nổi bật với đảo Lý Sơn hoang sơ và cảnh quan núi lửa độc đáo."
+},
+
+{ id: 19, category: "Miền Trung", name: "KHÁNH HÒA", size: "large",
+  img: "https://letsflytravel.vn/wp-content/uploads/2024/08/nha-trang-2.webp",
+  note: "Khánh Hòa nổi tiếng với thành phố biển Nha Trang và những vịnh biển đẹp hàng đầu thế giới."
+},
+
+{ id: 20, category: "Miền Trung", name: "GIA LAI", size: "tall",
+  img: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Bien_Ho_Gia_Lai.jpg",
+  note: "Gia Lai mang vẻ đẹp hoang sơ của Tây Nguyên với Biển Hồ, rừng thông và văn hóa cồng chiêng."
+},
+
+{ id: 21, category: "Miền Trung", name: "ĐẮK LẮK", size: "tall",
+  img: "https://upload.wikimedia.org/wikipedia/commons/3/3f/Dray_Nur_Waterfall.jpg",
+  note: "Đắk Lắk là thủ phủ cà phê Việt Nam, nổi bật với Buôn Đôn và thác Dray Nur hùng vĩ."
+},
+
+{ id: 22, category: "Miền Trung", name: "LÂM ĐỒNG", size: "large",
+  img: "https://upload.wikimedia.org/wikipedia/commons/1/1e/Xuan_Huong_Lake.jpg",
+  note: "Lâm Đồng nổi tiếng với Đà Lạt mộng mơ, khí hậu mát mẻ và cảnh sắc thiên nhiên lãng mạn."
+},
 
     // MIỀN NAM
-    { id: 10, category: "Miền Nam", name: "ĐÀ LẠT", size: "large", img: "https://static.vinwonders.com/production/ho-xuan-huong-da-lat-1.jpg", 
-      note: "Đà Lạt là thành phố ngàn hoa với khí hậu cao nguyên mát mẻ quanh năm và những rừng thông xanh ngát. Những địa danh như Hồ Xuân Hương, thung lũng Tình Yêu hay Dinh Bảo Đại mang lại vẻ đẹp lãng mạn, mộng mơ đặc trưng. Đà Lạt còn thu hút bởi những quán cà phê 'chill' và các vườn hoa rực rỡ sắc màu. Đây là điểm đến lý tưởng cho những chuyến nghỉ dưỡng, giúp bạn tận hưởng bầu không khí trong lành và cảnh sắc thiên nhiên dịu dàng." },
-    { id: 11, category: "Miền Nam", name: "PHÚ QUỐC", size: "wide", img: "https://rootytrip.com/wp-content/uploads/2024/07/phu-quoc.jpg", 
-      note: "Phú Quốc - Đảo Ngọc với những bãi biển hoang sơ như Bãi Sao, Bãi Trường luôn làm say lòng du khách. Đảo sở hữu các khu nghỉ dưỡng 5 sao quốc tế cùng những hoạt động giải trí quy mô như Grand World và Vinpearl Safari. Ngắm hoàng hôn tại Dinh Cậu hay thưởng thức hải sản tươi ngon tại chợ đêm là những trải nghiệm tuyệt vời. Phú Quốc không chỉ là thiên đường biển đảo mà còn là nơi nghỉ dưỡng sang trọng bậc nhất hiện nay." },
-    { id: 12, category: "Miền Nam", name: "CẦN THƠ", size: "wide", img: "https://tinviettravel.com.vn/uploads/cam-nang-du-lich/2025_01/cho-noi-cai-rang.jpg", 
-      note: "Cần Thơ là trái tim của miền Tây sông nước với chợ nổi Cái Răng nhộn nhịp mỗi sáng sớm. Du khách có thể trải nghiệm ngồi lênh đênh trên thuyền, thưởng thức hủ tiếu và trái cây tươi ngay tại chợ. Bến Ninh Kiều và những vườn trái cây trĩu quả mang lại nét đẹp bình dị, trù phú của vùng đồng bằng sông Cửu Long. Sự chân thành, hiếu khách của người dân Tây Đô cùng nét văn hóa sông nước độc đáo là điều khiến du khách luôn nhớ về." }
-  ];
+   {
+  id: 23,
+  category: "Miền Nam",
+  name: "TP. HỒ CHÍ MINH",
+  size: "large",
+  img: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Ho_Chi_Minh_City_Skyline_2022.jpg",
+  note: "TP. Hồ Chí Minh là trung tâm kinh tế sôi động với nhịp sống hiện đại, các công trình lịch sử nổi bật và nền ẩm thực đường phố phong phú. Thành phố không ngủ mang đến trải nghiệm năng động cả ngày lẫn đêm."
+},
+{
+  id: 24,
+  category: "Miền Nam",
+  name: "ĐỒNG NAI",
+  size: "wide",
+  img: "https://cdn.tgdd.vn/Files/2021/06/22/1363407/du-lich-dong-nai-1.jpg",
+  note: "Đồng Nai nổi bật với du lịch sinh thái như Vườn quốc gia Cát Tiên, hồ Trị An và các thác nước xanh mát, thích hợp cho nghỉ dưỡng cuối tuần."
+},
+{
+  id: 25,
+  category: "Miền Nam",
+  name: "TÂY NINH",
+  size: "large",
+  img: "https://ik.imagekit.io/tvlk/blog/2022/04/nui-ba-den-tay-ninh.jpg",
+  note: "Tây Ninh gắn liền với núi Bà Đen – biểu tượng tâm linh và du lịch nổi bật của Nam Bộ, mang đến trải nghiệm chinh phục và không gian thanh tịnh."
+},
+{
+  id: 26,
+  category: "Miền Nam",
+  name: "CẦN THƠ",
+  size: "wide",
+  img: "https://tinviettravel.com.vn/uploads/cam-nang-du-lich/2025_01/cho-noi-cai-rang.jpg",
+  note: "Cần Thơ là trung tâm miền Tây sông nước, nổi tiếng với chợ nổi Cái Răng, bến Ninh Kiều và nét văn hóa miệt vườn hiền hòa."
+},
+{
+  id: 27,
+  category: "Miền Nam",
+  name: "VĨNH LONG",
+  size: "large",
+  img: "https://mia.vn/media/uploads/blog-du-lich/cho-noi-vinh-long-1.jpg",
+  note: "Vĩnh Long mang vẻ đẹp yên bình với cù lao, vườn trái cây trĩu quả và không gian đậm chất miền Tây sông nước."
+},
+{
+  id: 28,
+  category: "Miền Nam",
+  name: "ĐỒNG THÁP",
+  size: "wide",
+  img: "https://mia.vn/media/uploads/blog-du-lich/tram-chim-dong-thap.jpg",
+  note: "Đồng Tháp nổi tiếng với cánh đồng sen và Vườn quốc gia Tràm Chim, mang vẻ đẹp thiên nhiên thuần khiết và yên tĩnh."
+},
+{
+  id: 29,
+  category: "Miền Nam",
+  name: "CÀ MAU",
+  size: "wide",
+  img: "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/07/dat-mui-ca-mau.jpg",
+  note: "Cà Mau là điểm cực Nam Tổ quốc với rừng ngập mặn, Đất Mũi thiêng liêng và nét đẹp hoang sơ đặc trưng."
+},
+{
+  id: 30,
+  category: "Miền Nam",
+  name: "AN GIANG",
+  size: "large",
+  img: "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/09/nui-cam-an-giang.jpg",
+  note: "An Giang nổi bật với Núi Cấm, rừng tràm Trà Sư và sự giao thoa văn hóa đặc sắc của các dân tộc vùng biên."
+},
+{
+  id: 31,
+  category: "Miền Nam",
+  name: "PHÚ QUỐC",
+  size: "large",
+  img: "https://rootytrip.com/wp-content/uploads/2024/07/phu-quoc.jpg",
+  note: "Phú Quốc là thiên đường biển đảo với bãi biển trong xanh, resort cao cấp và các hoạt động nghỉ dưỡng đẳng cấp quốc tế."
+}
+
+    ];
 
   const [searchFilter, setSearchFilter] = useState({
     destination: "",

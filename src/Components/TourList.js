@@ -72,10 +72,18 @@ const TourList = () => {
 
         // 2. Lọc theo Đánh giá (Rating)
         if (searchFilter.rating !== "") {
-            const minRating = Number(searchFilter.rating);
-            result = result.filter(t => (t.ratingsAverage || 5) >= minRating);
-        }
+    const selectedRating = Number(searchFilter.rating);
+    result = result.filter(t => {
+        // Ưu tiên lấy ratingsAverage từ API, nếu không có mặc định là 5
+        const tourRating = t.ratingsAverage || t.averageRating || 5; 
+        
+        // Cách 1: Lọc chính xác theo phần nguyên (4.2 và 4.8 đều là 4)
+        return Math.floor(tourRating) === selectedRating;
 
+        // Cách 2: Lọc theo kiểu "Từ X sao trở lên" (Phổ biến trong TMĐT)
+        // return tourRating >= selectedRating && tourRating < (selectedRating + 1);
+    });
+}
         // 3. Lọc theo các trường text
         if (searchFilter.destination.trim() !== "") {
             const keyword = searchFilter.destination.toLowerCase();
@@ -209,8 +217,8 @@ const TourList = () => {
                                 <div className="d-flex flex-wrap gap-2 mt-1">
                                     {[
                                         { label: "5 sao", val: "5" },
-                                        { label: "Từ 4 sao", val: "4" },
-                                        { label: "Từ 3 sao", val: "3" }
+                                        { label: "4 sao", val: "4" },
+                                        { label: "3 sao", val: "3" }
                                     ].map(item => (
                                         <Button
                                             key={item.val}
@@ -277,7 +285,7 @@ const TourList = () => {
                                                         <div className="d-flex justify-content-between align-items-start">
                                                             <Card.Title className="fw-bold fs-5 mb-2 text-primary">{tour.title}</Card.Title>
                                                             <div className="bg-warning px-2 py-1 rounded small fw-bold">
-                                                                {tour.ratingsAverage || 5} <i className="bi bi-star-fill"></i>
+                                                                {tour.averageRating || 5} <i className="bi bi-star-fill"></i>
                                                             </div>
                                                         </div>
                                                         <Row className="small text-secondary mt-3">
