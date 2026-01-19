@@ -7,6 +7,11 @@ import {
 } from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
+// Danh sách tỉnh thành mẫu (Bạn có thể mở rộng thêm)
+const VIETNAM_PROVINCES = [
+    "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "TP. Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
+];
+
 const TourList = () => {
     const [tours, setTours] = useState([]);
     const [filteredTours, setFilteredTours] = useState([]);
@@ -70,22 +75,17 @@ const TourList = () => {
         else if (searchFilter.budget === "10-20") result = result.filter(t => t.price > 10000000 && t.price <= 20000000);
         else if (searchFilter.budget === "above20") result = result.filter(t => t.price > 20000000);
 
-        // 2. Lọc theo Đánh giá (Rating)
+        // 2. Lọc theo Đánh giá
         if (searchFilter.rating !== "") {
-    const selectedRating = Number(searchFilter.rating);
-    result = result.filter(t => {
-        // Ưu tiên lấy ratingsAverage từ API, nếu không có mặc định là 5
-        const tourRating = t.ratingsAverage || t.averageRating || 5; 
-        
-        // Cách 1: Lọc chính xác theo phần nguyên (4.2 và 4.8 đều là 4)
-        return Math.floor(tourRating) === selectedRating;
+            const selectedRating = Number(searchFilter.rating);
+            result = result.filter(t => {
+                const tourRating = t.ratingsAverage || t.averageRating || 5; 
+                return Math.floor(tourRating) === selectedRating;
+            });
+        }
 
-        // Cách 2: Lọc theo kiểu "Từ X sao trở lên" (Phổ biến trong TMĐT)
-        // return tourRating >= selectedRating && tourRating < (selectedRating + 1);
-    });
-}
-        // 3. Lọc theo các trường text
-        if (searchFilter.destination.trim() !== "") {
+        // 3. Lọc theo Điểm đến (Dropdown)
+        if (searchFilter.destination !== "") {
             const keyword = searchFilter.destination.toLowerCase();
             result = result.filter(t =>
                 t.title.toLowerCase().includes(keyword) || 
@@ -93,11 +93,13 @@ const TourList = () => {
             );
         }
 
-        if (searchFilter.startLocation.trim() !== "") {
+        // 4. Lọc theo Điểm khởi hành (Dropdown)
+        if (searchFilter.startLocation !== "") {
             const loc = searchFilter.startLocation.toLowerCase();
             result = result.filter(t => t.startLocation?.toLowerCase().includes(loc));
         }
 
+        // 5. Lọc theo ngày
         if (searchFilter.travelDate) {
             const selectedDate = new Date(searchFilter.travelDate);
             result = result.filter(t => {
@@ -188,7 +190,7 @@ const TourList = () => {
                             <span className="text-primary small" style={{ cursor: 'pointer' }} onClick={handleResetFilter}>Xóa lọc</span>
                         </div>
                         <Form>
-                            {/* Ngân sách - Button Group */}
+                            {/* Ngân sách */}
                             <Form.Group className="mb-4">
                                 <Form.Label className="fw-bold small">Ngân sách</Form.Label>
                                 <div className="d-flex flex-wrap gap-2 mt-1">
@@ -211,41 +213,64 @@ const TourList = () => {
                                 </div>
                             </Form.Group>
 
-                            {/* Đánh giá - Button Group (MỚI) */}
+                            {/* Đánh giá */}
                             <Form.Group className="mb-4">
                                 <Form.Label className="fw-bold small">Hạng đánh giá</Form.Label>
                                 <div className="d-flex flex-wrap gap-2 mt-1">
-                                    {[
-                                        { label: "5 sao", val: "5" },
-                                        { label: "4 sao", val: "4" },
-                                        { label: "3 sao", val: "3" }
-                                    ].map(item => (
-                                        <Button
-                                            key={item.val}
-                                            variant={searchFilter.rating === item.val ? "warning" : "outline-secondary"}
-                                            size="sm" 
-                                            style={{ 
-                                                width: item.val === "5" ? '100%' : '47%', 
-                                                fontSize: '0.75rem', 
-                                                fontWeight: '600',
-                                                color: searchFilter.rating === item.val ? '#000' : ''
-                                            }}
-                                            onClick={() => setSearchFilter({ ...searchFilter, rating: item.val })}
-                                        >
-                                            {item.label} <i className="bi bi-star-fill ms-1 text-dark"></i>
-                                        </Button>
-                                    ))}
+                                   {[
+    { label: "5 sao", val: "5" },
+    { label: "4 sao", val: "4" },
+    { label: "3 sao", val: "3" },
+    { label: "2 sao", val: "2" },
+    { label: "1 sao", val: "1" }
+].map(item => (
+    <Button
+        key={item.val}
+        variant={searchFilter.rating === item.val ? "warning" : "outline-secondary"}
+        size="sm" 
+        style={{ 
+            // Nếu là 5 sao thì chiếm hết hàng, các sao còn lại đi theo cặp
+            width: item.val === "5" ? '100%' : '47%', 
+            fontSize: '0.75rem', 
+            fontWeight: '600',
+            color: searchFilter.rating === item.val ? '#000' : ''
+        }}
+        onClick={() => setSearchFilter({ ...searchFilter, rating: item.val })}
+    >
+        {item.label} <i className="bi bi-star-fill ms-1 text-dark"></i>
+    </Button>
+))}
                                 </div>
                             </Form.Group>
 
+                            {/* Điểm khởi hành - CHUYỂN THÀNH DROPDOWN */}
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-bold small">Điểm khởi hành</Form.Label>
-                                <Form.Control type="text" placeholder="Ví dụ: TP.HCM..." size="sm" value={searchFilter.startLocation} onChange={(e) => setSearchFilter({ ...searchFilter, startLocation: e.target.value })} />
+                                <Form.Select 
+                                    size="sm" 
+                                    value={searchFilter.startLocation} 
+                                    onChange={(e) => setSearchFilter({ ...searchFilter, startLocation: e.target.value })}
+                                >
+                                    <option value="">Tất cả điểm đi</option>
+                                    {VIETNAM_PROVINCES.map((city, index) => (
+                                        <option key={index} value={city}>{city}</option>
+                                    ))}
+                                </Form.Select>
                             </Form.Group>
 
+                            {/* Điểm đến - CHUYỂN THÀNH DROPDOWN */}
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-bold small">Điểm đến</Form.Label>
-                                <Form.Control type="text" placeholder="Nhập địa danh..." size="sm" value={searchFilter.destination} onChange={(e) => setSearchFilter({ ...searchFilter, destination: e.target.value })} />
+                                <Form.Select 
+                                    size="sm" 
+                                    value={searchFilter.destination} 
+                                    onChange={(e) => setSearchFilter({ ...searchFilter, destination: e.target.value })}
+                                >
+                                    <option value="">Tất cả điểm đến</option>
+                                    {VIETNAM_PROVINCES.map((city, index) => (
+                                        <option key={index} value={city}>{city}</option>
+                                    ))}
+                                </Form.Select>
                             </Form.Group>
 
                             <Form.Group className="mb-4">

@@ -96,7 +96,7 @@ const PaymentPage = () => {
         }
       `}</style>
 
-      <h2 className="text-center fw-bold mb-4">💳 Danh Sách Tour Cần Thanh Toán</h2>
+      <h2 className="text-center fw-bold mb-4"> Danh Sách Tour Cần Thanh Toán</h2>
 
       {message && <Alert variant="danger">{message}</Alert>}
 

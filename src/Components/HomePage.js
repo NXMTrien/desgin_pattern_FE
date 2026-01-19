@@ -3,11 +3,41 @@ import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const [tours, setTours] = useState([]);
+  const [suggestedTours, setSuggestedTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Miền Bắc");
 
   const categories = ["Miền Bắc", "Miền Trung", "Miền Nam"];
+
+  useEffect(() => {
+    const fetchSuggestedTours = async () => {
+      try {
+        // Bạn có thể đổi URL này thành endpoint phù hợp (ví dụ: lấy tour mới nhất hoặc tour khuyến mãi)
+        const res = await fetch("http://localhost:5000/api/tours");
+        const data = await res.json();
+        if (data.status === "success") {
+          setSuggestedTours(data.data.tours || []);
+        }
+      } catch (err) {
+        console.error("Lỗi fetch suggested tours:", err);
+      }
+    };
+
+    fetchSuggestedTours();
+  }, []);
+
+  // 2. Fetch dữ liệu cho phần TOP RATED (Giữ nguyên của bạn)
+  useEffect(() => {
+    setLoading(true);
+    fetch("http://localhost:5000/api/tours/top-5-rated")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") setTours(data.data.tours || []);
+      })
+      .catch((err) => console.error("Lỗi fetch top tours:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   // Dữ liệu đã tối ưu size để Grid luôn khít
   const allDestinations = [
@@ -228,6 +258,7 @@ export default function HomePage() {
     <div style={{ fontFamily: "'Poppins', sans-serif", backgroundColor: "#ffffff" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css');
 
         :root {
           --brand-100: #e3f2fd;
@@ -250,7 +281,78 @@ export default function HomePage() {
         }
 
         .hero-full img { width: 100vw; height: 100%; object-fit: cover; }
+/* Flip Card Styling */
+        .flip-card {
+          background-color: transparent;
+          height: 380px;
+          perspective: 1000px;
+          cursor: pointer;
+        }
 
+        .flip-card-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          text-align: left;
+          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-style: preserve-3d;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          border-radius: 15px;
+        }
+
+        .flip-card:hover .flip-card-inner {
+          transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          border-radius: 15px;
+          overflow: hidden;
+        }
+
+        .flip-card-front {
+          background-color: #ffffff;
+          color: #333;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          border: 1px solid #eee;
+        }
+
+        .flip-card-back {
+          background-color: var(--dark-blue);
+          transform: rotateY(180deg);
+        }
+
+        .flip-card-back img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .info-row {
+          display: flex;
+          align-items: center;
+          margin-bottom: 12px;
+          font-size: 0.9rem;
+          color: #555;
+        }
+
+        .info-row i {
+          width: 25px;
+          color: var(--brand-500);
+          font-size: 1.1rem;
+          margin-right: 8px;
+        }
+
+        .price-label {
+          margin-top: auto;
+          text-align: right;
+        }
         .hero-overlay {
           position: absolute;
           inset: 0;
@@ -466,6 +568,74 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+      {/* SECTION GỢI Ý CHUYẾN ĐI (FLIP CARDS) */}
+      {/* GỢI Ý CHUYẾN ĐI (DỮ LIỆU TỪ DATABASE) */}
+      <section className="py-5 mt-5">
+        <div className="container">
+          <div className="text-center mb-5">
+            <h2 className="fw-bold text-uppercase" style={{ color: "#0b4a7a" }}>Gợi Ý Chuyến Đi</h2>
+            <div className="mx-auto" style={{ width: "60px", height: "3px", backgroundColor: "#2196f3" }}></div>
+          </div>
+
+          <div className="row g-4">
+            {suggestedTours.length > 0 ? (
+              suggestedTours.map((tour) => (
+                <div key={tour._id} className="col-12 col-md-6 col-lg-3">
+                  <div className="flip-card">
+                    <div className="flip-card-inner">
+                      {/* MẶT TRƯỚC: Lấy từ Database */}
+                      <div className="flip-card-front">
+                        <small className="text-muted fw-bold mb-1">CHUYẾN ĐI MỚI NHẤT</small>
+                        <h6 className="fw-bold text-primary mb-3" style={{ height: '40px', overflow: 'hidden' }}>{tour.title}</h6>
+                        
+                        <div className="info-row">
+                          <i className="bi bi-qr-code"></i>
+                          <span><strong>Mã:</strong> {tour._id?.substring(0, 8).toUpperCase()}</span>
+                        </div>
+                        <div className="info-row">
+                          <i className="bi bi-geo-alt"></i>
+                          <span><strong>Điểm đến:</strong> {tour.destination || "Việt Nam"}</span>
+                        </div>
+                        <div className="info-row">
+                          <i className="bi bi-clock"></i>
+                          <span><strong>Thời lượng:</strong> {tour.duration} ngày</span>
+                        </div>
+                        <div className="info-row">
+                          <i className="bi bi-people"></i>
+                          <span><strong>Số chỗ:</strong> {tour.maxGroupSize} người</span>
+                        </div>
+
+                        <div className="mt-auto text-end">
+                          <small className="text-muted">Giá từ</small>
+                          <h5 className="text-danger fw-bold mb-0">{tour.price?.toLocaleString()} ₫</h5>
+                        </div>
+                      </div>
+
+                      {/* MẶT SAU: Hình ảnh từ Database */}
+                      <div className="flip-card-back">
+                        <img 
+                          src={tour.imageCover ? `http://localhost:5000/img/tours/${tour.imageCover}` : "https://picsum.photos/400/600"} 
+                          alt={tour.title} 
+                        />
+                        <div className="position-absolute top-50 start-50 translate-middle w-100 text-center">
+                          <button 
+                            className="btn btn-light btn-sm rounded-pill fw-bold shadow"
+                            onClick={() => navigate(`/tour_detail/${tour._id}`)}
+                          >
+                            XEM CHI TIẾT
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center">Đang tải gợi ý...</p>
+            )}
           </div>
         </div>
       </section>

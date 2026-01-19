@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Form, Alert, Card, Modal } from 'react-bootstrap';
+import { Button, Form, Alert, Card, Modal, Accordion } from 'react-bootstrap';
 import { MapPin, Clock, Users, BookOpen, Star, MessageSquare } from 'lucide-react';
 
 // --- COMPONENT ĐÁNH GIÁ ---
@@ -134,34 +134,72 @@ const ReviewSection = ({ tourId }) => {
     );
 };
 
-// --- COMPONENT BLOG (CHỈ ÁP DỤNG ĐỊNH DẠNG "NGÀY" CHO PHẦN ATTRACTIONS) ---
+// --- COMPONENT BLOG (NÂNG CẤP ĐỊNH DẠNG SÁNG/TRƯA/CHIỀU) ---
 const BlogContent = ({ blog }) => {
     if (!blog || !blog.description) return <Alert variant="warning">Chưa có nội dung Blog chi tiết cho Tour này.</Alert>;
 
-    // Hàm này chỉ được dùng cho blog.description.attractions
-    const renderFormattedAttractions = (text) => {
+    // Hàm xử lý nội dung chi tiết: Tìm Sáng/Trưa/Chiều và thụt lề
+    const renderDetailedTimeline = (text) => {
         if (!text) return null;
-        const parts = text.split(/(?=Ngày \d+)/g);
 
-        return parts.map((part, index) => {
-            const lines = part.trim().split('\n');
-            const firstLine = lines[0];
-            const restOfText = lines.slice(1).join('\n');
+        // Regex tách nội dung dựa trên các từ khóa: Sáng, Trưa, Chiều (có hoặc không có dấu ngoặc)
+        const timeSegments = text.split(/(?=\(?(?:Sáng|Trưa|Chiều)\)?)/g).filter(s => s.trim() !== "");
 
-            if (firstLine.startsWith("Ngày")) {
+        return timeSegments.map((segment, idx) => {
+            const lines = segment.trim().split('\n');
+            const header = lines[0]; // Dòng tiêu đề (ví dụ: "Sáng:" hoặc "(Trưa)")
+            const content = lines.slice(1).join('\n'); // Phần nội dung còn lại
+
+            // Kiểm tra xem dòng đầu tiên có chứa từ khóa thời gian không
+            const isTimeHeader = /\(?(?:Sáng|Trưa|Chiều)\)?/.test(header);
+
+            if (isTimeHeader) {
                 return (
-                    <div key={index} className="mb-4">
-                        <h4 className="text-primary fw-bold mt-3 border-bottom pb-2">
-                            📍 {firstLine}
-                        </h4>
-                        <p style={{ whiteSpace: 'pre-wrap' }} className="ps-3 text-secondary">
-                            {restOfText}
-                        </p>
+                    <div key={idx} className="mb-3">
+                        {/* Tiêu đề H2 in đậm cho buổi */}
+                        <h2 className="fw-bold text-dark mt-3" style={{ fontSize: '1.2rem' }}>
+                            {header}
+                        </h2>
+                        {/* Nội dung lùi vào 1 ô (Sử dụng ps-4 của Bootstrap) */}
+                        <div className="ps-4 text-secondary border-start" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                            {content || "Đang cập nhật nội dung..."}
+                        </div>
                     </div>
                 );
             }
-            return <p key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</p>;
+
+            // Nếu không phải từ khóa Sáng/Trưa/Chiều thì hiện như đoạn văn bình thường
+            return <p key={idx} style={{ whiteSpace: 'pre-wrap' }} className="text-secondary">{segment}</p>;
         });
+    };
+
+    const renderFormattedAttractions = (text) => {
+        if (!text) return null;
+        
+        const parts = text.split(/(?=Ngày \d+)/g).filter(p => p.trim() !== "");
+
+        return (
+            <Accordion defaultActiveKey="0" flush className="border rounded shadow-sm">
+                {parts.map((part, index) => {
+                    const lines = part.trim().split('\n');
+                    const dayTitle = lines[0]; 
+                    const dayDescription = lines.slice(1).join('\n'); 
+
+                    return (
+                        <Accordion.Item eventKey={index.toString()} key={index}>
+                            <Accordion.Header>
+                                <span className="fw-bold text-primary">
+                                    {dayTitle}
+                                </span>
+                            </Accordion.Header>
+                            <Accordion.Body className="bg-white">
+                                {renderDetailedTimeline(dayDescription)}
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    );
+                })}
+            </Accordion>
+        );
     };
 
     return (
@@ -176,13 +214,14 @@ const BlogContent = ({ blog }) => {
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.detail}</p>
             </div>
 
-            {/* CHỈ PHẦN NÀY LÀ CÓ H1/H4 NỔI BẬT "NGÀY" */}
-            <h5 className="mt-4 fw-bold text-primary bg-primary bg-opacity-10 p-2 rounded">📸 Điểm tham quan nổi bật</h5>
-            <div className="p-3 mb-3">
+            <h5 className="mt-4 fw-bold text-primary bg-primary bg-opacity-10 p-2 rounded mb-3">
+                 Lịch trình tham quan chi tiết
+            </h5>
+            <div className="mb-4">
                 {renderFormattedAttractions(blog.description.attractions)}
             </div>
 
-            <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded">💡 Sơ lược để chuyến đi ý nghĩa</h5>
+            <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded"> Lưu ý cho chuyến đi</h5>
             <div className="p-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.meaningful_description}</p>
             </div>
@@ -275,7 +314,7 @@ const TourDetail = () => {
                 navigate("/payment");
             }
         } catch (err) {
-            setErrors(err.response?.data?.message || "❌ Đặt tour thất bại!");
+            setErrors(err.response?.data?.message || " Đặt tour thất bại!");
         }
     };
 
