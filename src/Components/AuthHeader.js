@@ -108,6 +108,10 @@ function AuthHeader() {
                   <i className="bi bi-credit-card me-2"></i> Xác nhận thanh toán
                 </NavDropdown.Item>
 
+                <NavDropdown.Item as={Link} to="/admin/contact">
+                  <i className="bi bi-credit-card me-2"></i>CSKH
+                </NavDropdown.Item>
+
                 <NavDropdown.Divider />
 
                 <NavDropdown.Item as={Link} to="/manage-users">

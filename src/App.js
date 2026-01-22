@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import Home from './Components/HomePage';
+import Home from './Components/User/HomePage';
 import AuthHeader from './Components/AuthHeader';
-import LoginForm from './Components/LoginForm';
-import RegisterForm from './Components/RegisterForm';
-import ProfileView from './Components/ProfileView';
-import CategoryForm from './Components/CategoryForm';
-import TourForm from './Components/TourForm';
-import UserForm from './Components/UserManagementForm';
-import TourList from './Components/TourList';
-import CustomTourPage from './Components/CustomTourPage';
-import AdminCustomTourPage from './Components/AdminCustomTourPage';
-import PaymentPage from './Components/PaymentPage';
+import LoginForm from './Components/User/LoginForm';
+import RegisterForm from './Components/User/RegisterForm';
+import ProfileView from './Components/User/ProfileView';
+import CategoryForm from './Components/Admin/CategoryForm';
+import TourForm from './Components/Admin/TourForm';
+import UserForm from './Components/Admin/UserManagementForm';
+import TourList from './Components/User/TourList';
+import CustomTourPage from './Components/User/CustomTourPage';
+import AdminCustomTourPage from './Components/Admin/AdminCustomTourPage';
+import PaymentPage from './Components/User/PaymentPage';
 import VerifyEmailForm from './Components/VerifyEmailForm';
-import ForgotPassword from './Components/ForgotPassword';
-import CheckoutBankPage from './Components/CheckoutPage';
-import TourDetail from './Components/TourDetail';
-import AdminPaymentConfirmation from './Components/AdminPaymentConfirmation';
-import MyBookings from './Components/BookingUser';
+import ForgotPassword from './Components/User/ForgotPassword';
+import CheckoutBankPage from './Components/User/CheckoutPage';
+import TourDetail from './Components/User/TourDetail';
+import AdminPaymentConfirmation from './Components/Admin/AdminPaymentConfirmation';
+import MyBookings from './Components/User/BookingUser';
 import Footer from './Components/AuthFooter';
-import AdminBooking from './Components/AdminBookingManager';
+import AdminBooking from './Components/Admin/AdminBookingManager';
 import { customAlert } from './utils/customAlert';
-import Contact from './Components/ContactPage';
+import Contact from './Components/User/ContactPage';
+import AdminContact from './Components/Admin/AdminContact';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
@@ -95,8 +96,9 @@ export default function App() {
                 <Route path="/tour_detail/:id" element={<TourDetail/>} />
                 <Route path="/admin_payment" element={<AdminPaymentConfirmation />} />
                 <Route path="/contact" element={<Contact />} />
+                 <Route path="/admin/contact" element={<AdminContact />} />
+                  <Route path="/admin_booking" element={<AdminBooking />} />
                  <Route path="/my-bookings" element={<MyBookings />} />
-               <Route path="/admin_booking" element={<AdminBooking />} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>
       </main>
