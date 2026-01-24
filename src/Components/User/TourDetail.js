@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button, Form, Alert, Card, Modal, Accordion } from 'react-bootstrap';
-import { MapPin, Clock, Users, BookOpen, Star, MessageSquare } from 'lucide-react';
+import { Button, Form, Alert, Card, Modal, Accordion, Spinner } from 'react-bootstrap';
+import { MapPin, Clock, Users, BookOpen, Star, MessageSquare, Loader2 } from 'lucide-react';
 
 // --- COMPONENT ĐÁNH GIÁ ---
 const ReviewSection = ({ tourId }) => {
@@ -91,6 +91,7 @@ const ReviewSection = ({ tourId }) => {
                             />
                         </Form.Group>
                         <Button variant="primary" type="submit" disabled={loading} className="px-4 fw-bold">
+                            {loading ? <Spinner animation="border" size="sm" className="me-2" /> : null}
                             {loading ? "Đang gửi..." : "Gửi đánh giá"}
                         </Button>
                     </Form>
@@ -134,63 +135,45 @@ const ReviewSection = ({ tourId }) => {
     );
 };
 
-// --- COMPONENT BLOG (NÂNG CẤP ĐỊNH DẠNG SÁNG/TRƯA/CHIỀU) ---
+// --- COMPONENT BLOG ---
 const BlogContent = ({ blog }) => {
     if (!blog || !blog.description) return <Alert variant="warning">Chưa có nội dung Blog chi tiết cho Tour này.</Alert>;
 
-    // Hàm xử lý nội dung chi tiết: Tìm Sáng/Trưa/Chiều và thụt lề
     const renderDetailedTimeline = (text) => {
         if (!text) return null;
-
-        // Regex tách nội dung dựa trên các từ khóa: Sáng, Trưa, Chiều (có hoặc không có dấu ngoặc)
         const timeSegments = text.split(/(?=\(?(?:Sáng|Trưa|Chiều)\)?)/g).filter(s => s.trim() !== "");
-
         return timeSegments.map((segment, idx) => {
             const lines = segment.trim().split('\n');
-            const header = lines[0]; // Dòng tiêu đề (ví dụ: "Sáng:" hoặc "(Trưa)")
-            const content = lines.slice(1).join('\n'); // Phần nội dung còn lại
-
-            // Kiểm tra xem dòng đầu tiên có chứa từ khóa thời gian không
+            const header = lines[0]; 
+            const content = lines.slice(1).join('\n');
             const isTimeHeader = /\(?(?:Sáng|Trưa|Chiều)\)?/.test(header);
-
             if (isTimeHeader) {
                 return (
                     <div key={idx} className="mb-3">
-                        {/* Tiêu đề H2 in đậm cho buổi */}
-                        <h2 className="fw-bold text-dark mt-3" style={{ fontSize: '1.2rem' }}>
-                            {header}
-                        </h2>
-                        {/* Nội dung lùi vào 1 ô (Sử dụng ps-4 của Bootstrap) */}
+                        <h2 className="fw-bold text-dark mt-3" style={{ fontSize: '1.2rem' }}>{header}</h2>
                         <div className="ps-4 text-secondary border-start" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
                             {content || "Đang cập nhật nội dung..."}
                         </div>
                     </div>
                 );
             }
-
-            // Nếu không phải từ khóa Sáng/Trưa/Chiều thì hiện như đoạn văn bình thường
             return <p key={idx} style={{ whiteSpace: 'pre-wrap' }} className="text-secondary">{segment}</p>;
         });
     };
 
     const renderFormattedAttractions = (text) => {
         if (!text) return null;
-        
         const parts = text.split(/(?=Ngày \d+)/g).filter(p => p.trim() !== "");
-
         return (
             <Accordion defaultActiveKey="0" flush className="border rounded shadow-sm">
                 {parts.map((part, index) => {
                     const lines = part.trim().split('\n');
                     const dayTitle = lines[0]; 
                     const dayDescription = lines.slice(1).join('\n'); 
-
                     return (
                         <Accordion.Item eventKey={index.toString()} key={index}>
                             <Accordion.Header>
-                                <span className="fw-bold text-primary">
-                                    {dayTitle}
-                                </span>
+                                <span className="fw-bold text-primary">{dayTitle}</span>
                             </Accordion.Header>
                             <Accordion.Body className="bg-white">
                                 {renderDetailedTimeline(dayDescription)}
@@ -208,19 +191,12 @@ const BlogContent = ({ blog }) => {
                 <BookOpen className="me-2" /> {blog.title}
             </h3>
             <hr />
-            
             <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded">📋 Chi tiết Tour</h5>
             <div className="p-3 mb-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.detail}</p>
             </div>
-
-            <h5 className="mt-4 fw-bold text-primary bg-primary bg-opacity-10 p-2 rounded mb-3">
-                 Lịch trình tham quan chi tiết
-            </h5>
-            <div className="mb-4">
-                {renderFormattedAttractions(blog.description.attractions)}
-            </div>
-
+            <h5 className="mt-4 fw-bold text-primary bg-primary bg-opacity-10 p-2 rounded mb-3">Lịch trình tham quan chi tiết</h5>
+            <div className="mb-4">{renderFormattedAttractions(blog.description.attractions)}</div>
             <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded"> Lưu ý cho chuyến đi</h5>
             <div className="p-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.meaningful_description}</p>
@@ -240,6 +216,7 @@ const TourDetail = () => {
     const [form, setForm] = useState({ numberOfPeople: "", startDate: "", endDate: "" });
     const [errors, setErrors] = useState("");
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [isBooking, setIsBooking] = useState(false); // TRẠNG THÁI LOADING
 
     useEffect(() => {
         const fetchTour = async () => {
@@ -294,6 +271,10 @@ const TourDetail = () => {
         if (!form.numberOfPeople || !form.startDate) {
             return setErrors("⚠️ Vui lòng nhập đầy đủ Số người và Ngày khởi hành!");
         }
+
+        setIsBooking(true); // BẮT ĐẦU LOADING
+        setErrors("");
+
         try {
             const res = await axios.post(
                 `http://localhost:5000/api/bookings`,
@@ -314,7 +295,8 @@ const TourDetail = () => {
                 navigate("/payment");
             }
         } catch (err) {
-            setErrors(err.response?.data?.message || " Đặt tour thất bại!");
+            setErrors(err.response?.data?.message || "❌ Đặt tour thất bại!");
+            setIsBooking(false); // CHỈ TẮT LOADING KHI CÓ LỖI
         }
     };
 
@@ -367,36 +349,6 @@ const TourDetail = () => {
                             <span className="text-muted"> / người</span>
                         </div>
 
-                        <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
-                            <Modal.Body className="text-center p-5">
-                                <div className="mb-4">
-                                    <Star size={60} className="text-warning mb-2" fill="#ffc107" />
-                                    <div style={{ fontSize: '50px', marginTop: '-40px' }}>🔑</div>
-                                </div>
-                                <h4 className="fw-bold text-dark">Yêu cầu đăng nhập</h4>
-                                <p className="text-muted">
-                                    Bạn cần đăng nhập tài khoản để thực hiện chức năng đặt tour và quản lý chuyến đi của mình.
-                                </p>
-                                <div className="d-grid gap-2 mt-4">
-                                    <Button
-                                        variant="primary"
-                                        size="lg"
-                                        className="fw-bold"
-                                        onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
-                                    >
-                                        Đăng nhập ngay
-                                    </Button>
-                                    <Button
-                                        variant="link"
-                                        className="text-secondary"
-                                        onClick={() => setShowLoginModal(false)}
-                                    >
-                                        Để sau
-                                    </Button>
-                                </div>
-                            </Modal.Body>
-                        </Modal>
-
                         <Form.Group className="mb-3">
                             <Form.Label>Số người</Form.Label>
                             <Form.Control
@@ -404,6 +356,7 @@ const TourDetail = () => {
                                 name="numberOfPeople"
                                 value={form.numberOfPeople}
                                 onChange={handleChange}
+                                disabled={isBooking}
                                 min="1"
                                 max={tour.maxGroupSize}
                             />
@@ -411,7 +364,7 @@ const TourDetail = () => {
 
                         <Form.Group className="mb-3">
                             <Form.Label className="fw-bold text-primary">Lịch khởi hành</Form.Label>
-                            <Form.Select name="startDate" value={form.startDate} onChange={handleChange}>
+                            <Form.Select name="startDate" value={form.startDate} onChange={handleChange} disabled={isBooking}>
                                 <option value="">-- Chọn ngày --</option>
                                 {tour.startDate?.map((date, idx) => (
                                     <option key={idx} value={date}>
@@ -428,16 +381,47 @@ const TourDetail = () => {
 
                         {errors && <Alert variant="danger" className="mt-3 py-2 small">{errors}</Alert>}
 
-                      <Button 
-                            className="w-100 btn-lg fw-bold" 
+                        <Button 
+                            className="w-100 btn-lg fw-bold d-flex align-items-center justify-content-center" 
                             variant="primary" 
                             onClick={handleConfirmBooking}
+                            disabled={isBooking}
                         >
-                            Xác Nhận Đặt Tour
+                            {isBooking ? (
+                                <>
+                                    <Spinner animation="border" size="sm" className="me-2" />
+                                    Đang xử lý...
+                                </>
+                            ) : (
+                                "Xác Nhận Đặt Tour"
+                            )}
                         </Button>
                     </div>
                 </div>
             </div>
+
+            {/* Modal yêu cầu đăng nhập */}
+            <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
+                <Modal.Body className="text-center p-5">
+                    <div className="mb-4">
+                        <Star size={60} className="text-warning mb-2" fill="#ffc107" />
+                        <div style={{ fontSize: '50px', marginTop: '-40px' }}>🔑</div>
+                    </div>
+                    <h4 className="fw-bold text-dark">Yêu cầu đăng nhập</h4>
+                    <p className="text-muted">Bạn cần đăng nhập tài khoản để thực hiện chức năng đặt tour.</p>
+                    <div className="d-grid gap-2 mt-4">
+                        <Button
+                            variant="primary"
+                            size="lg"
+                            className="fw-bold"
+                            onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
+                        >
+                            Đăng nhập ngay
+                        </Button>
+                        <Button variant="link" className="text-secondary" onClick={() => setShowLoginModal(false)}>Để sau</Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };

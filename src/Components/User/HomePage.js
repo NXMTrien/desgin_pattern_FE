@@ -51,58 +51,58 @@ export default function HomePage() {
     { id: 4, category: "Miền Bắc", name: "NINH BÌNH", size: "small", img: "https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/%E1%BA%A3nh%20%C4%91%E1%BA%B9p%20ninh%20b%C3%ACnh/anh-dep-ninh-binh-3.jpg", 
       note: "Ninh Bình được ví như 'Hạ Long trên cạn' với quần thể danh thắng Tràng An và Tam Cốc rực rỡ. Ngồi trên thuyền nhỏ lướt trên dòng sông Ngô Đồng, du khách sẽ được chiêm ngưỡng những dãy núi đá vôi sừng sững và những hang động kỳ ảo. Ngoài ra, Cố đô Hoa Lư và chùa Bái Đính còn mang lại những giá trị lịch sử, tâm linh sâu sắc. Ninh Bình là sự kết hợp hoàn hảo giữa vẻ đẹp thiên nhiên yên bình và những dấu ấn văn hóa nghìn năm." },
    { id: 5, category: "Miền Bắc", name: "TUYÊN QUANG", size: "tall",
-  img: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Na_Hang_lake.jpg",
+  img: "https://bbt.1cdn.vn/2023/10/09/z4766772064294_bce15ab57709c2dfb1e6d746e72219de.jpg",
   note: "Tuyên Quang là tỉnh mới được hình thành từ Hà Giang và Tuyên Quang, nổi bật với cao nguyên đá hùng vĩ, hồ sinh thái Na Hang và những cung đường đèo ngoạn mục. Vùng đất này mang vẻ đẹp nguyên sơ của núi rừng Đông Bắc, kết hợp bản sắc văn hóa độc đáo của các dân tộc vùng cao."
 },
 
 { id: 6, category: "Miền Bắc", name: "THÁI NGUYÊN", size: "small",
-  img: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Che_Tan_Cuong.jpg",
+  img: "https://file3.qdnd.vn/data/images/0/2023/04/22/vuhuyen/58.jpg?dpi=150&quality=100&w=870",
   note: "Thái Nguyên được sáp nhập từ Bắc Kạn và Thái Nguyên, là trung tâm kinh tế – giáo dục vùng trung du miền núi phía Bắc. Nơi đây nổi tiếng với chè Tân Cương, núi rừng xanh mát và nhiều di tích lịch sử cách mạng."
 },
 
 { id: 7, category: "Miền Bắc", name: "PHÚ THỌ", size: "large",
-  img: "https://upload.wikimedia.org/wikipedia/commons/5/56/Den_Hung.jpg",
+  img: "https://upload.wikimedia.org/wikipedia/commons/2/21/%C4%90%C6%B0%E1%BB%9Dng_l%C3%AAn_%C4%90%E1%BB%81n_H%C3%B9ng_-_panoramio.jpg",
   note: "Phú Thọ mới được hình thành từ Vĩnh Phúc, Phú Thọ và Hòa Bình, là vùng đất cội nguồn dân tộc Việt Nam. Nổi bật với Đền Hùng linh thiêng, hồ thủy điện Hòa Bình và những thung lũng xanh mát, nơi đây kết hợp hài hòa giữa văn hóa – lịch sử – thiên nhiên."
 },
 
 { id: 8, category: "Miền Bắc", name: "BẮC NINH", size: "small",
-  img: "https://upload.wikimedia.org/wikipedia/commons/4/47/Lim_festival.jpg",
+  img: "https://booking.muongthanh.com/upload_images/images/H%60/chua-but-thap.jpg",
   note: "Bắc Ninh được sáp nhập từ Bắc Giang và Bắc Ninh, là trung tâm công nghiệp – văn hóa lớn của miền Bắc. Đây là cái nôi của dân ca Quan họ, mang đậm nét văn hóa Kinh Bắc truyền thống xen lẫn sự phát triển hiện đại."
 },
 
 { id: 9, category: "Miền Bắc", name: "HƯNG YÊN", size: "large",
-  img: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Pho_Hien.jpg",
+  img: "https://cdn.tgdd.vn/Files/2023/06/01/1532455/du-lich-hung-yen-voi-x-dia-diem-hap-dan-nhat-dinh-phai-ghe-202306011130029885.jpg",
   note: "Hưng Yên mới được hợp nhất từ Hưng Yên và Thái Bình, nổi bật với vùng đồng bằng trù phú, Phố Hiến cổ kính và những làng quê Bắc Bộ yên bình. Đây là khu vực phát triển mạnh về nông nghiệp và công nghiệp nhẹ."
 },
 
 { id: 10, category: "Miền Bắc", name: "HÀ NỘI", size: "wide",
-  img: "https://upload.wikimedia.org/wikipedia/commons/6/65/Hoan_Kiem_Lake.jpg",
+  img: "https://res.klook.com/image/upload/q_85/c_fill,w_1360/v1719994970/cl3nrblmsvaqztfj47kh.webp",
   note: "Hà Nội là thủ đô của Việt Nam, trung tâm chính trị – văn hóa – giáo dục của cả nước. Thành phố mang vẻ đẹp giao thoa giữa lịch sử ngàn năm và nhịp sống hiện đại."
 },
 
 { id: 11, category: "Miền Bắc", name: "HẢI PHÒNG", size: "wide",
-  img: "https://upload.wikimedia.org/wikipedia/commons/0/09/Cat_Ba_island.jpg",
+  img: "https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/h%E1%BA%A3i%20ph%C3%B2ng%20mi%E1%BB%81n%20n%C3%A0o/hai-phong-mien-nao-1.jpg",
   note: "Hải Phòng là thành phố cảng lớn của miền Bắc, nổi tiếng với đảo Cát Bà, vịnh Lan Hạ và nền kinh tế biển phát triển năng động."
 },
 
     // MIỀN TRUNG
     { id: 12, category: "Miền Trung", name: "THANH HÓA", size: "large",
-  img: "https://upload.wikimedia.org/wikipedia/commons/5/55/Sam_Son_Beach.jpg",
+  img: "https://bizweb.dktcdn.net/thumb/grande/100/081/807/articles/bien-sam-son-thanh-hoa.jpg?v=1541670060107",
   note: "Thanh Hóa là vùng đất giao thoa giữa Bắc và Trung Bộ, nổi bật với biển Sầm Sơn, suối cá Cẩm Lương và Thành Nhà Hồ – di sản văn hóa thế giới. Nơi đây vừa mang vẻ đẹp thiên nhiên đa dạng vừa đậm dấu ấn lịch sử lâu đời."
 },
 
 { id: 13, category: "Miền Trung", name: "NGHỆ AN", size: "tall",
-  img: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Cua_Lo_beach.jpg",
+  img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSP72eLjGVNjeos-QrLizENq14g6Y5zsBecQ&s",
   note: "Nghệ An là quê hương Chủ tịch Hồ Chí Minh, nổi tiếng với biển Cửa Lò, rừng quốc gia Pù Mát và những làng quê xứ Nghệ mộc mạc."
 },
 
 { id: 14, category: "Miền Trung", name: "HÀ TĨNH", size: "small",
-  img: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Thien_Cam_Beach.jpg",
+  img: "https://vcdn1-dulich.vnecdn.net/2024/05/07/ho-ke-go-9057-1715072242.jpg?w=0&h=0&q=100&dpr=1&fit=crop&s=WXOPMqw603bXPxu84dKFmQ",
   note: "Hà Tĩnh gây ấn tượng với biển Thiên Cầm hoang sơ, núi Hồng Lĩnh hùng vĩ và những giá trị văn hóa dân gian đặc sắc."
 },
 
 { id: 15, category: "Miền Trung", name: "QUẢNG TRỊ", size: "small",
-  img: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Vinh_Moc_Tunnels.jpg",
+  img: "https://cdn.tgdd.vn/Files/2021/07/03/1365421/10-dia-diem-du-lich-quang-tri-dang-di-nhat-202308181537507901.jpg",
   note: "Quảng Trị là vùng đất lịch sử gắn liền với cầu Hiền Lương – sông Bến Hải và địa đạo Vịnh Mốc."
 },
 
@@ -117,7 +117,7 @@ export default function HomePage() {
 },
 
 { id: 18, category: "Miền Trung", name: "QUẢNG NGÃI", size: "large",
-  img: "https://upload.wikimedia.org/wikipedia/commons/6/6c/Ly_Son_Island.jpg",
+  img: "https://static.vinwonders.com/production/diem-du-lich-quang-ngai-1.jpg",
   note: "Quảng Ngãi nổi bật với đảo Lý Sơn hoang sơ và cảnh quan núi lửa độc đáo."
 },
 
@@ -127,17 +127,17 @@ export default function HomePage() {
 },
 
 { id: 20, category: "Miền Trung", name: "GIA LAI", size: "tall",
-  img: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Bien_Ho_Gia_Lai.jpg",
+  img: "https://vcdn1-dulich.vnecdn.net/2023/10/25/thongT-1698224695-2101-1698229160.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=4sJEM8_IgVci5anUyJceSA",
   note: "Gia Lai mang vẻ đẹp hoang sơ của Tây Nguyên với Biển Hồ, rừng thông và văn hóa cồng chiêng."
 },
 
 { id: 21, category: "Miền Trung", name: "ĐẮK LẮK", size: "tall",
-  img: "https://upload.wikimedia.org/wikipedia/commons/3/3f/Dray_Nur_Waterfall.jpg",
+  img: "https://vcdn1-dulich.vnecdn.net/2022/04/20/thacDakLak02-1650454521-7409-1650455161.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=6vZa8c69p_IJvwjcOJE3hg",
   note: "Đắk Lắk là thủ phủ cà phê Việt Nam, nổi bật với Buôn Đôn và thác Dray Nur hùng vĩ."
 },
 
 { id: 22, category: "Miền Trung", name: "LÂM ĐỒNG", size: "large",
-  img: "https://upload.wikimedia.org/wikipedia/commons/1/1e/Xuan_Huong_Lake.jpg",
+  img: "https://samtenhills.vn/wp-content/uploads/2024/01/thac-pongour-voi-quang-canh-tuyet-dep.jpg",
   note: "Lâm Đồng nổi tiếng với Đà Lạt mộng mơ, khí hậu mát mẻ và cảnh sắc thiên nhiên lãng mạn."
 },
 
@@ -147,7 +147,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "TP. HỒ CHÍ MINH",
   size: "large",
-  img: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Ho_Chi_Minh_City_Skyline_2022.jpg",
+  img: "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/07/5214486810_49ccd5c42f_z-1.jpg",
   note: "TP. Hồ Chí Minh là trung tâm kinh tế sôi động với nhịp sống hiện đại, các công trình lịch sử nổi bật và nền ẩm thực đường phố phong phú. Thành phố không ngủ mang đến trải nghiệm năng động cả ngày lẫn đêm."
 },
 {
@@ -155,7 +155,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "ĐỒNG NAI",
   size: "wide",
-  img: "https://cdn.tgdd.vn/Files/2021/06/22/1363407/du-lich-dong-nai-1.jpg",
+  img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfhQyc4X2Q8MhzkXXO0_HDJ4jzIVD1uVMHGw&s",
   note: "Đồng Nai nổi bật với du lịch sinh thái như Vườn quốc gia Cát Tiên, hồ Trị An và các thác nước xanh mát, thích hợp cho nghỉ dưỡng cuối tuần."
 },
 {
@@ -163,7 +163,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "TÂY NINH",
   size: "large",
-  img: "https://ik.imagekit.io/tvlk/blog/2022/04/nui-ba-den-tay-ninh.jpg",
+  img: "https://mia.vn/media/uploads/blog-du-lich/du-lich-tay-ninh-12-1753671798.jpg",
   note: "Tây Ninh gắn liền với núi Bà Đen – biểu tượng tâm linh và du lịch nổi bật của Nam Bộ, mang đến trải nghiệm chinh phục và không gian thanh tịnh."
 },
 {
@@ -179,7 +179,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "VĨNH LONG",
   size: "large",
-  img: "https://mia.vn/media/uploads/blog-du-lich/cho-noi-vinh-long-1.jpg",
+  img: "https://cdn.tgdd.vn/Files/2021/07/03/1365427/23-dia-diem-du-lich-vinh-long-hap-dan-khach-du-lich-202201071810564126.jpg",
   note: "Vĩnh Long mang vẻ đẹp yên bình với cù lao, vườn trái cây trĩu quả và không gian đậm chất miền Tây sông nước."
 },
 {
@@ -187,7 +187,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "ĐỒNG THÁP",
   size: "wide",
-  img: "https://mia.vn/media/uploads/blog-du-lich/tram-chim-dong-thap.jpg",
+  img: "https://vcdn1-dulich.vnecdn.net/2023/12/10/senT-jpeg-4319-1702147840.jpg?w=0&h=0&q=100&dpr=1&fit=crop&s=s7Ghwis70BJ0AqOBL4AipA",
   note: "Đồng Tháp nổi tiếng với cánh đồng sen và Vườn quốc gia Tràm Chim, mang vẻ đẹp thiên nhiên thuần khiết và yên tĩnh."
 },
 {
@@ -195,7 +195,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "CÀ MAU",
   size: "wide",
-  img: "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/07/dat-mui-ca-mau.jpg",
+  img: "https://media.vietravel.com/images/Content/dia-diem-du-lich-ca-mau-1.jpg",
   note: "Cà Mau là điểm cực Nam Tổ quốc với rừng ngập mặn, Đất Mũi thiêng liêng và nét đẹp hoang sơ đặc trưng."
 },
 {
@@ -203,7 +203,7 @@ export default function HomePage() {
   category: "Miền Nam",
   name: "AN GIANG",
   size: "large",
-  img: "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2017/09/nui-cam-an-giang.jpg",
+  img: "https://cdn.vntrip.vn/cam-nang/wp-content/uploads/2018/02/nui-cam-an-giang-1.png",
   note: "An Giang nổi bật với Núi Cấm, rừng tràm Trà Sư và sự giao thoa văn hóa đặc sắc của các dân tộc vùng biên."
 },
 {
