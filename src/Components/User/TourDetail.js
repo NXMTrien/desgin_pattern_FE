@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Alert, Card, Modal, Accordion, Spinner } from 'react-bootstrap';
-import { MapPin, Clock, Users, BookOpen, Star, MessageSquare, Loader2 } from 'lucide-react';
+import { MapPin, Clock, Users, BookOpen, Star, MessageSquare } from 'lucide-react';
 
 // --- COMPONENT ĐÁNH GIÁ ---
 const ReviewSection = ({ tourId }) => {
@@ -137,6 +137,8 @@ const ReviewSection = ({ tourId }) => {
 
 // --- COMPONENT BLOG ---
 const BlogContent = ({ blog }) => {
+    const [activeKey, setActiveKey] = useState("0"); 
+
     if (!blog || !blog.description) return <Alert variant="warning">Chưa có nội dung Blog chi tiết cho Tour này.</Alert>;
 
     const renderDetailedTimeline = (text) => {
@@ -164,16 +166,44 @@ const BlogContent = ({ blog }) => {
     const renderFormattedAttractions = (text) => {
         if (!text) return null;
         const parts = text.split(/(?=Ngày \d+)/g).filter(p => p.trim() !== "");
+        
         return (
-            <Accordion defaultActiveKey="0" flush className="border rounded shadow-sm">
+            <Accordion 
+                activeKey={activeKey} 
+                onSelect={(k) => setActiveKey(k)} 
+                flush 
+                className="border rounded shadow-sm overflow-hidden"
+            >
                 {parts.map((part, index) => {
                     const lines = part.trim().split('\n');
                     const dayTitle = lines[0]; 
                     const dayDescription = lines.slice(1).join('\n'); 
+                    const isOpening = activeKey === index.toString();
+
                     return (
                         <Accordion.Item eventKey={index.toString()} key={index}>
                             <Accordion.Header>
-                                <span className="fw-bold text-primary">{dayTitle}</span>
+                                <span className={`fw-bold ${isOpening ? 'text-white' : 'text-dark'}`}>
+                                    {dayTitle}
+                                </span>
+                                <style>{`
+                                    .accordion-item:nth-child(${index + 1}) .accordion-button {
+                                        background-color: white !important;
+                                        color: #212529 !important;
+                                        font-weight: 700 !important;
+                                        box-shadow: none !important;
+                                    }
+
+                                    .accordion-item:nth-child(${index + 1}) .accordion-button:not(.collapsed) {
+                                        background-color: #007bff !important;
+                                        color: white !important;
+                                        transition: all 0.3s ease;
+                                    }
+
+                                    .accordion-item:nth-child(${index + 1}) .accordion-button:not(.collapsed)::after {
+                                        filter: brightness(0) invert(1);
+                                    }
+                                `}</style>
                             </Accordion.Header>
                             <Accordion.Body className="bg-white">
                                 {renderDetailedTimeline(dayDescription)}
@@ -195,7 +225,10 @@ const BlogContent = ({ blog }) => {
             <div className="p-3 mb-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.detail}</p>
             </div>
-            <h5 className="mt-4 fw-bold text-primary bg-primary bg-opacity-10 p-2 rounded mb-3">Lịch trình tham quan chi tiết</h5>
+            
+            {/* ĐÃ CẬP NHẬT: Màu đen mặc định cho dòng tiêu đề này */}
+            <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded mb-3">Lịch trình tham quan chi tiết</h5>
+            
             <div className="mb-4">{renderFormattedAttractions(blog.description.attractions)}</div>
             <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded"> Lưu ý cho chuyến đi</h5>
             <div className="p-3 border rounded bg-light-subtle">
@@ -216,7 +249,7 @@ const TourDetail = () => {
     const [form, setForm] = useState({ numberOfPeople: "", startDate: "", endDate: "" });
     const [errors, setErrors] = useState("");
     const [showLoginModal, setShowLoginModal] = useState(false);
-    const [isBooking, setIsBooking] = useState(false); // TRẠNG THÁI LOADING
+    const [isBooking, setIsBooking] = useState(false);
 
     useEffect(() => {
         const fetchTour = async () => {
@@ -272,7 +305,7 @@ const TourDetail = () => {
             return setErrors("⚠️ Vui lòng nhập đầy đủ Số người và Ngày khởi hành!");
         }
 
-        setIsBooking(true); // BẮT ĐẦU LOADING
+        setIsBooking(true);
         setErrors("");
 
         try {
@@ -296,7 +329,7 @@ const TourDetail = () => {
             }
         } catch (err) {
             setErrors(err.response?.data?.message || "❌ Đặt tour thất bại!");
-            setIsBooking(false); // CHỈ TẮT LOADING KHI CÓ LỖI
+            setIsBooking(false);
         }
     };
 
@@ -327,7 +360,7 @@ const TourDetail = () => {
                                 className="rounded border shadow-sm"
                                 style={{
                                     height: "80px", width: "80px", objectFit: "cover", cursor: "pointer",
-                                    border: mainImage.endsWith(img) ? '3px solid #007bff' : '1px solid #ddd'
+                                    border: mainImage?.endsWith(img) ? '3px solid #007bff' : '1px solid #ddd'
                                 }}
                                 onClick={() => setMainImage(`http://localhost:5000/img/tours/${img}`)}
                                 alt="thumb"
@@ -400,7 +433,6 @@ const TourDetail = () => {
                 </div>
             </div>
 
-            {/* Modal yêu cầu đăng nhập */}
             <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
                 <Modal.Body className="text-center p-5">
                     <div className="mb-4">
