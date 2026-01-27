@@ -24,6 +24,7 @@ import AdminBooking from './Components/Admin/AdminBookingManager';
 import { customAlert } from './utils/customAlert';
 import Contact from './Components/User/ContactPage';
 import AdminContact from './Components/Admin/AdminContact';
+import AdminBlogPage from './Components/Admin/AdminBlogPage';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
@@ -98,6 +99,7 @@ export default function App() {
                 <Route path="/contact" element={<Contact />} />
                  <Route path="/admin/contact" element={<AdminContact />} />
                   <Route path="/admin_booking" element={<AdminBooking />} />
+                    <Route path="/admin_blog" element={<AdminBlogPage />} />
                  <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/profile" element={<ProfileView currentUser={currentUser} onLogout={handleLogout} />} />
         </Routes>

@@ -13,11 +13,11 @@ export default function HomePage() {
   useEffect(() => {
     const fetchSuggestedTours = async () => {
       try {
-        // Bạn có thể đổi URL này thành endpoint phù hợp (ví dụ: lấy tour mới nhất hoặc tour khuyến mãi)
         const res = await fetch("http://localhost:5000/api/tours");
         const data = await res.json();
         if (data.status === "success") {
-          setSuggestedTours(data.data.tours || []);
+          const limitedTours = (data.data.tours || []).slice(0, 8);
+        setSuggestedTours(limitedTours);
         }
       } catch (err) {
         console.error("Lỗi fetch suggested tours:", err);

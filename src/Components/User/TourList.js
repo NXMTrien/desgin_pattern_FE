@@ -7,7 +7,6 @@ import {
 } from 'react-bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-// Danh sách tỉnh thành mẫu (Bạn có thể mở rộng thêm)
 const VIETNAM_PROVINCES = [
     "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "TP. Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
 ];
@@ -49,7 +48,7 @@ const TourList = () => {
                 let filtered = allTours;
                 if (dest) {
                     filtered = filtered.filter(t =>
-                        t.title.toLowerCase().includes(dest.toLowerCase()) ||
+                        t.title?.toLowerCase().includes(dest.toLowerCase()) ||
                         t.destination?.toLowerCase().includes(dest.toLowerCase())
                     );
                     setSearchFilter(prev => ({ ...prev, destination: dest }));
@@ -58,7 +57,7 @@ const TourList = () => {
                 setTours(allTours);
                 setFilteredTours(filtered);
             } catch (error) {
-                console.error('Lỗi:', error);
+                console.error('Lỗi khi tải tour:', error);
             } finally {
                 setLoading(false);
             }
@@ -84,16 +83,16 @@ const TourList = () => {
             });
         }
 
-        // 3. Lọc theo Điểm đến (Dropdown)
+        // 3. Lọc theo Điểm đến
         if (searchFilter.destination !== "") {
             const keyword = searchFilter.destination.toLowerCase();
             result = result.filter(t =>
-                t.title.toLowerCase().includes(keyword) || 
+                t.title?.toLowerCase().includes(keyword) || 
                 t.destination?.toLowerCase().includes(keyword)
             );
         }
 
-        // 4. Lọc theo Điểm khởi hành (Dropdown)
+        // 4. Lọc theo Điểm khởi hành
         if (searchFilter.startLocation !== "") {
             const loc = searchFilter.startLocation.toLowerCase();
             result = result.filter(t => t.startLocation?.toLowerCase().includes(loc));
@@ -115,6 +114,7 @@ const TourList = () => {
     const handleResetFilter = () => {
         setSearchFilter({ budget: "", destination: "", tourType: "", startLocation: "", travelDate: "", rating: "" });
         setFilteredTours(tours);
+        setCurrentPage(1);
     };
 
     const calculateEndDate = (start, duration) => {
@@ -159,17 +159,18 @@ const TourList = () => {
                 numberOfPeople: Number(form.numberOfPeople),
                 startDate: form.startDate,
             }, { headers: { Authorization: `Bearer ${token}` } });
+            
             alert("Đặt tour thành công!");
             setShowModal(false);
             navigate("/payment");
         } catch (error) {
-            setErrors(error.response?.data?.message || "Đặt tour thất bại");
+            setErrors(error.response?.data?.message || "Đặt tour thất bại. Vui lòng thử lại.");
         }
     };
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const indexOfLastTour = currentPage * toursPerPage;
@@ -177,17 +178,22 @@ const TourList = () => {
     const currentTours = filteredTours.slice(indexOfFirstTour, indexOfLastTour);
     const totalPages = Math.ceil(filteredTours.length / toursPerPage);
 
-    if (loading) return <div className="text-center mt-5"><Spinner animation="border" /><p>Đang tải dữ liệu...</p></div>;
+    if (loading) return (
+        <div className="text-center mt-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2">Đang tải danh sách tour...</p>
+        </div>
+    );
 
     return (
         <Container className="my-5">
             <Row>
                 {/* SIDEBAR BỘ LỌC */}
                 <Col md={3} className="mb-4">
-                    <div className="p-3 border rounded shadow-sm bg-white position-sticky" style={{ top: '20px' }}>
+                    <Card className="p-3 shadow-sm border-0 position-sticky" style={{ top: '20px' }}>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h6 className="fw-bold mb-0 text-uppercase" style={{ fontSize: '0.85rem' }}>Bộ lọc tìm kiếm</h6>
-                            <span className="text-primary small" style={{ cursor: 'pointer' }} onClick={handleResetFilter}>Xóa lọc</span>
+                            <span className="text-primary small fw-bold" style={{ cursor: 'pointer' }} onClick={handleResetFilter}>Xóa lọc</span>
                         </div>
                         <Form>
                             {/* Ngân sách */}
@@ -204,7 +210,7 @@ const TourList = () => {
                                             key={item.val}
                                             variant={searchFilter.budget === item.val ? "primary" : "outline-secondary"}
                                             size="sm" 
-                                            style={{ width: '47%', fontSize: '0.7rem', fontWeight: '500' }}
+                                            style={{ width: '47%', fontSize: '0.75rem' }}
                                             onClick={() => setSearchFilter({ ...searchFilter, budget: item.val })}
                                         >
                                             {item.label}
@@ -217,33 +223,24 @@ const TourList = () => {
                             <Form.Group className="mb-4">
                                 <Form.Label className="fw-bold small">Hạng đánh giá</Form.Label>
                                 <div className="d-flex flex-wrap gap-2 mt-1">
-                                   {[
-    { label: "5 sao", val: "5" },
-    { label: "4 sao", val: "4" },
-    { label: "3 sao", val: "3" },
-    { label: "2 sao", val: "2" },
-    { label: "1 sao", val: "1" }
-].map(item => (
-    <Button
-        key={item.val}
-        variant={searchFilter.rating === item.val ? "warning" : "outline-secondary"}
-        size="sm" 
-        style={{ 
-            // Nếu là 5 sao thì chiếm hết hàng, các sao còn lại đi theo cặp
-            width: item.val === "5" ? '100%' : '47%', 
-            fontSize: '0.75rem', 
-            fontWeight: '600',
-            color: searchFilter.rating === item.val ? '#000' : ''
-        }}
-        onClick={() => setSearchFilter({ ...searchFilter, rating: item.val })}
-    >
-        {item.label} <i className="bi bi-star-fill ms-1 text-dark"></i>
-    </Button>
-))}
+                                    {["5", "4", "3", "2", "1"].map(star => (
+                                        <Button
+                                            key={star}
+                                            variant={searchFilter.rating === star ? "warning" : "outline-secondary"}
+                                            size="sm" 
+                                            style={{ 
+                                                width: star === "5" ? '100%' : '47%', 
+                                                fontSize: '0.75rem', 
+                                                fontWeight: '600'
+                                            }}
+                                            onClick={() => setSearchFilter({ ...searchFilter, rating: star })}
+                                        >
+                                            {star} <i className="bi bi-star-fill ms-1"></i>
+                                        </Button>
+                                    ))}
                                 </div>
                             </Form.Group>
 
-                            {/* Điểm khởi hành - CHUYỂN THÀNH DROPDOWN */}
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-bold small">Điểm khởi hành</Form.Label>
                                 <Form.Select 
@@ -258,7 +255,6 @@ const TourList = () => {
                                 </Form.Select>
                             </Form.Group>
 
-                            {/* Điểm đến - CHUYỂN THÀNH DROPDOWN */}
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-bold small">Điểm đến</Form.Label>
                                 <Form.Select 
@@ -275,42 +271,58 @@ const TourList = () => {
 
                             <Form.Group className="mb-4">
                                 <Form.Label className="fw-bold small">Ngày đi dự kiến</Form.Label>
-                                <Form.Control type="date" size="sm" value={searchFilter.travelDate} onChange={(e) => setSearchFilter({ ...searchFilter, travelDate: e.target.value })} />
+                                <Form.Control 
+                                    type="date" 
+                                    size="sm" 
+                                    value={searchFilter.travelDate} 
+                                    onChange={(e) => setSearchFilter({ ...searchFilter, travelDate: e.target.value })} 
+                                />
                             </Form.Group>
 
-                            <Button variant="primary" className="w-100 fw-bold py-2 shadow-sm border-0" style={{ backgroundColor: '#005294' }} onClick={handleApplyFilter}>TÌM KIẾM NGAY</Button>
+                            <Button 
+                                variant="primary" 
+                                className="w-100 fw-bold py-2 shadow-sm" 
+                                style={{ backgroundColor: '#005294', border: 'none' }} 
+                                onClick={handleApplyFilter}
+                            >
+                                TÌM KIẾM NGAY
+                            </Button>
                         </Form>
-                    </div>
+                    </Card>
                 </Col>
 
                 {/* DANH SÁCH TOUR */}
                 <Col md={9}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h5 className="mb-0 fw-bold">Tour du lịch ưu đãi</h5>
+                        <h5 className="mb-0 fw-bold">Kết quả tìm kiếm</h5>
                         <div className="small text-muted">Tìm thấy <span className="text-primary fw-bold">{filteredTours.length}</span> tour</div>
                     </div>
 
                     <Row>
                         {currentTours.length === 0 ? (
                             <Col className="text-center py-5">
-                                <i className="bi bi-emoji-frown fs-1 text-muted"></i>
-                                <h5 className="mt-3 text-muted">Không tìm thấy tour phù hợp.</h5>
+                                <i className="bi bi-search fs-1 text-muted"></i>
+                                <h5 className="mt-3 text-muted">Rất tiếc, không tìm thấy tour phù hợp!</h5>
+                                <Button variant="link" onClick={handleResetFilter}>Xem tất cả tour</Button>
                             </Col>
                         ) : (
                             currentTours.map((tour) => (
                                 <Col md={12} key={tour._id} className="mb-4">
-                                    <Card className="shadow-sm border-0 overflow-hidden tour-card-hover">
+                                    <Card className="shadow-sm border-0 overflow-hidden h-100">
                                         <Row className="g-0">
                                             <Col md={4}>
-                                                <Card.Img src={tour.imageCover ? `http://localhost:5000/img/tours/${tour.imageCover}` : 'https://via.placeholder.com/400x250'} style={{ height: '100%', objectFit: 'cover', minHeight: '220px' }} />
+                                                <Card.Img 
+                                                    src={tour.imageCover ? `http://localhost:5000/img/tours/${tour.imageCover}` : 'https://via.placeholder.com/400x250'} 
+                                                    style={{ height: '100%', objectFit: 'cover', minHeight: '220px' }} 
+                                                />
                                             </Col>
                                             <Col md={8}>
-                                                <Card.Body className="p-4 d-flex flex-column justify-content-between h-100">
-                                                    <div>
+                                                <Card.Body className="p-4 d-flex flex-column h-100">
+                                                    <div className="flex-grow-1">
                                                         <div className="d-flex justify-content-between align-items-start">
                                                             <Card.Title className="fw-bold fs-5 mb-2 text-primary">{tour.title}</Card.Title>
                                                             <div className="bg-warning px-2 py-1 rounded small fw-bold">
-                                                                {tour.averageRating || 5} <i className="bi bi-star-fill"></i>
+                                                              {tour.averageRating || 5} <i className="bi bi-star-fill"></i>
                                                             </div>
                                                         </div>
                                                         <Row className="small text-secondary mt-3">
@@ -324,8 +336,8 @@ const TourList = () => {
                                                                     </span>
                                                                 ))}
                                                             </Col>
-                                                            <Col xs={6}><i className="bi bi-map me-2"></i>Từ: {tour.startLocation}</Col>
-                                                            <Col xs={6}><i className="bi bi-people me-2"></i>Chỗ trống: {tour.maxGroupSize} người</Col>
+                                                            <Col xs={6}><i className="bi bi-map me-2"></i>Từ: {tour.startLocation || "Liên hệ"}</Col>
+                                                            <Col xs={6}><i className="bi bi-people me-2"></i>Chỗ: {tour.maxGroupSize} người</Col>
                                                         </Row>
                                                     </div>
                                                     <div className="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
@@ -334,8 +346,8 @@ const TourList = () => {
                                                             <div className="fs-4 fw-bold text-danger">{tour.price?.toLocaleString()} ₫</div>
                                                         </div>
                                                         <div className="d-flex gap-2">
-                                                            <Button variant="outline-primary" size="sm" className="px-3" onClick={() => openBookingForm(tour)}>Đặt ngay</Button>
-                                                            <Button variant="primary" size="sm" className="px-3" onClick={() => navigate(`/tour_detail/${tour._id}`)}>Chi tiết</Button>
+                                                            <Button variant="outline-primary" size="sm" onClick={() => openBookingForm(tour)}>Đặt ngay</Button>
+                                                            <Button variant="primary" size="sm" onClick={() => navigate(`/tour_detail/${tour._id}`)}>Chi tiết</Button>
                                                         </div>
                                                     </div>
                                                 </Card.Body>
@@ -353,7 +365,9 @@ const TourList = () => {
                             <Pagination>
                                 <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
                                 {[...Array(totalPages)].map((_, i) => (
-                                    <Pagination.Item key={i + 1} active={i + 1 === currentPage} onClick={() => handlePageChange(i + 1)}>{i + 1}</Pagination.Item>
+                                    <Pagination.Item key={i + 1} active={i + 1 === currentPage} onClick={() => handlePageChange(i + 1)}>
+                                        {i + 1}
+                                    </Pagination.Item>
                                 ))}
                                 <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
                             </Pagination>
@@ -367,10 +381,10 @@ const TourList = () => {
                 <Modal.Body className="text-center p-5">
                     <i className="bi bi-shield-lock text-warning mb-3" style={{ fontSize: "4rem" }}></i>
                     <h4 className="fw-bold">Yêu cầu đăng nhập</h4>
-                    <p className="text-muted">Bạn cần có tài khoản để thực hiện đặt tour trực tuyến.</p>
+                    <p className="text-muted">Bạn cần đăng nhập để đặt tour trực tuyến.</p>
                     <div className="d-grid gap-2 mt-4">
-                        <Button variant="primary" className="py-2 fw-bold border-0" style={{ backgroundColor: '#005294' }} onClick={() => navigate("/login")}>ĐĂNG NHẬP NGAY</Button>
-                        <Button variant="link" className="text-muted text-decoration-none" onClick={() => setShowLoginAlert(false)}>Hủy bỏ</Button>
+                        <Button variant="primary" onClick={() => navigate("/login")}>ĐĂNG NHẬP NGAY</Button>
+                        <Button variant="link" className="text-muted" onClick={() => setShowLoginAlert(false)}>Hủy bỏ</Button>
                     </div>
                 </Modal.Body>
             </Modal>
@@ -385,7 +399,7 @@ const TourList = () => {
                     <Form>
                         <Form.Group className="mb-3">
                             <Form.Label className="small fw-bold">Số khách đi cùng</Form.Label>
-                            <Form.Control type="number" min="1" name="numberOfPeople" value={form.numberOfPeople} onChange={handleInputChange} />
+                            <Form.Control type="number" min="1" max={selectedTour?.maxGroupSize} name="numberOfPeople" value={form.numberOfPeople} onChange={handleInputChange} />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label className="small fw-bold">Ngày khởi hành dự kiến</Form.Label>
@@ -396,14 +410,15 @@ const TourList = () => {
                                 ))}
                             </Form.Select>
                         </Form.Group>
-                        <Form.Group>
-                            <Form.Label className="small fw-bold text-muted">Ngày kết thúc dự tính: <span className="text-dark">{form.endDate ? new Date(form.endDate).toLocaleDateString('vi-VN') : '---'}</span></Form.Label>
-                        </Form.Group>
+                        <div className="p-3 bg-light rounded">
+                            <span className="small fw-bold text-muted">Ngày kết thúc dự tính: </span>
+                            <span className="fw-bold text-dark">{form.endDate ? new Date(form.endDate).toLocaleDateString('vi-VN') : '---'}</span>
+                        </div>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer className="border-0">
                     <Button variant="outline-secondary" onClick={() => setShowModal(false)}>Đóng</Button>
-                    <Button variant="primary" className="px-4" style={{ backgroundColor: '#005294' }} onClick={handleConfirmBooking}>Xác nhận đặt tour</Button>
+                    <Button variant="primary" style={{ backgroundColor: '#005294' }} onClick={handleConfirmBooking}>Xác nhận đặt tour</Button>
                 </Modal.Footer>
             </Modal>
         </Container>

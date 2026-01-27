@@ -2,7 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Alert, Card, Modal, Accordion, Spinner } from 'react-bootstrap';
-import { MapPin, Clock, Users, BookOpen, Star, MessageSquare } from 'lucide-react';
+import { MapPin, Clock, Users, BookOpen, Star, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
+
+// --- COMPONENT THÔNG BÁO CHUNG ---
+const NotificationModal = ({ show, onHide, title, message, variant }) => (
+    <Modal show={show} onHide={onHide} centered size="sm">
+        <Modal.Body className="text-center p-4">
+            {variant === 'success' ? (
+                <CheckCircle size={50} className="text-success mb-3" />
+            ) : (
+                <XCircle size={50} className="text-danger mb-3" />
+            )}
+            <h5 className="fw-bold">{title}</h5>
+            <p className="text-muted mb-4">{message}</p>
+            <Button variant={variant} onClick={onHide} className="w-100 fw-bold">
+                Đóng
+            </Button>
+        </Modal.Body>
+    </Modal>
+);
 
 // --- COMPONENT ĐÁNH GIÁ ---
 const ReviewSection = ({ tourId }) => {
@@ -11,6 +29,10 @@ const ReviewSection = ({ tourId }) => {
     const [comment, setComment] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Trạng thái cho thông báo Modal
+    const [showNotify, setShowNotify] = useState(false);
+    const [notifyData, setNotifyData] = useState({ title: "", message: "", variant: "success" });
 
     const fetchReviews = async () => {
         try {
@@ -32,8 +54,21 @@ const ReviewSection = ({ tourId }) => {
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
-        if (!token) return setError("❌ Bạn cần đăng nhập để đánh giá!");
-        if (!comment.trim()) return setError("⚠️ Vui lòng nhập nội dung bình luận!");
+        
+        if (!token) {
+            setNotifyData({
+                title: "Yêu cầu đăng nhập",
+                message: "Vui lòng đăng nhập để gửi đánh giá của bạn.",
+                variant: "danger"
+            });
+            setShowNotify(true);
+            return;
+        }
+
+        if (!comment.trim()) {
+            setError("⚠️ Vui lòng nhập nội dung bình luận!");
+            return;
+        }
 
         setLoading(true);
         setError("");
@@ -43,12 +78,26 @@ const ReviewSection = ({ tourId }) => {
                 { rating, comment },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            
             setComment("");
             setRating(5);
             fetchReviews();
-            alert("✅ Cảm ơn bạn đã đánh giá!");
+
+            // Hiển thị thông báo thành công thay cho alert
+            setNotifyData({
+                title: "Thành công!",
+                message: "Cảm ơn bạn đã để lại đánh giá cho chuyến đi này.",
+                variant: "success"
+            });
+            setShowNotify(true);
+
         } catch (err) {
-            setError(err.response?.data?.message || "❌ Gửi đánh giá thất bại.");
+            setNotifyData({
+                title: "Gửi thất bại",
+                message: err.response?.data?.message || "Đã có lỗi xảy ra.",
+                variant: "danger"
+            });
+            setShowNotify(true);
         } finally {
             setLoading(false);
         }
@@ -56,6 +105,12 @@ const ReviewSection = ({ tourId }) => {
 
     return (
         <div className="mt-5 border-top pt-4">
+            <NotificationModal 
+                show={showNotify} 
+                onHide={() => setShowNotify(false)}
+                {...notifyData}
+            />
+
             <h3 className="mb-4 d-flex align-items-center fw-bold text-dark">
                 <MessageSquare className="me-2 text-primary" /> Đánh giá từ khách hàng ({reviews.length})
             </h3>
@@ -193,13 +248,11 @@ const BlogContent = ({ blog }) => {
                                         font-weight: 700 !important;
                                         box-shadow: none !important;
                                     }
-
                                     .accordion-item:nth-child(${index + 1}) .accordion-button:not(.collapsed) {
                                         background-color: #007bff !important;
                                         color: white !important;
                                         transition: all 0.3s ease;
                                     }
-
                                     .accordion-item:nth-child(${index + 1}) .accordion-button:not(.collapsed)::after {
                                         filter: brightness(0) invert(1);
                                     }
@@ -226,10 +279,9 @@ const BlogContent = ({ blog }) => {
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.detail}</p>
             </div>
             
-            {/* ĐÃ CẬP NHẬT: Màu đen mặc định cho dòng tiêu đề này */}
             <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded mb-3">Lịch trình tham quan chi tiết</h5>
-            
             <div className="mb-4">{renderFormattedAttractions(blog.description.attractions)}</div>
+            
             <h5 className="mt-4 fw-bold text-dark bg-light p-2 rounded"> Lưu ý cho chuyến đi</h5>
             <div className="p-3 border rounded bg-light-subtle">
                 <p style={{ whiteSpace: 'pre-wrap' }}>{blog.description.meaningful_description}</p>
@@ -324,7 +376,6 @@ const TourDetail = () => {
             if (res.data?.data?.vnpUrl) {
                 window.location.href = res.data.data.vnpUrl;
             } else {
-                alert("✅ Đặt tour thành công!");
                 navigate("/payment");
             }
         } catch (err) {
@@ -349,7 +400,7 @@ const TourDetail = () => {
                         src={mainImage}
                         className="img-fluid rounded mb-3 shadow-sm"
                         style={{ width: "100%", height: "450px", objectFit: "cover" }}
-                        alt="Main Cover"
+                        alt="Main"
                     />
 
                     <div className="d-flex gap-2 mb-4">
@@ -421,13 +472,8 @@ const TourDetail = () => {
                             disabled={isBooking}
                         >
                             {isBooking ? (
-                                <>
-                                    <Spinner animation="border" size="sm" className="me-2" />
-                                    Đang xử lý...
-                                </>
-                            ) : (
-                                "Xác Nhận Đặt Tour"
-                            )}
+                                <><Spinner animation="border" size="sm" className="me-2" /> Đang xử lý...</>
+                            ) : "Xác Nhận Đặt Tour"}
                         </Button>
                     </div>
                 </div>

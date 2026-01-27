@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { 
-    Upload, Image, Loader2, MapPin, Calendar, Edit3, 
-    Trash2, XCircle, DollarSign, Users, Clock, FileText, Info, PlusCircle, Navigation
+    Upload, Image, Loader2, MapPin, Edit3, 
+    Trash2, XCircle, PlusCircle, Navigation, CheckCircle2, AlertTriangle
 } from 'lucide-react';
 
 const VIETNAM_PROVINCES = [
@@ -23,13 +24,15 @@ const VIETNAM_PROVINCES = [
 ].sort();
 
 const TourForm = () => {
+    const navigate = useNavigate();
     const [editingTourId, setEditingTourId] = useState(null);
+    const [deletingId, setDeletingId] = useState(null);
+    const [showConfirm, setShowConfirm] = useState({ show: false, tour: null }); // State cho Modal xác nhận xóa
+    
     const [formData, setFormData] = useState({
         title: "", destination: "", duration: 1, category: "", price: "",
         maxGroupSize: "", description: "", startLocation: "TP. Hồ Chí Minh",
-        startDates: [], currentDateInput: "",
-        blogTitle: "", blogDetail: "", blogMeaningfulDescription: "",
-        itinerary: []
+        startDates: [], currentDateInput: ""
     });
 
     const [imageCover, setImageCover] = useState(null);
@@ -55,15 +58,6 @@ const TourForm = () => {
         fetchTours();
     }, []);
 
-    useEffect(() => {
-        const numDays = parseInt(formData.duration) || 1;
-        const newItinerary = Array.from({ length: numDays }, (_, i) => ({
-            day: i + 1,
-            content: formData.itinerary[i]?.content || ""
-        }));
-        setFormData(prev => ({ ...prev, itinerary: newItinerary }));
-    }, [formData.duration]);
-
     const getAuthHeaders = () => {
         const token = localStorage.getItem("token");
         return token ? { Authorization: `Bearer ${token}` } : {};
@@ -73,14 +67,14 @@ const TourForm = () => {
         try {
             const res = await axios.get("http://localhost:5000/api/categories", { headers: getAuthHeaders() });
             setCategories(res.data.data.categories || []);
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error("Lỗi fetch categories:", error); }
     };
 
     const fetchTours = async () => {
         try {
             const res = await axios.get("http://localhost:5000/api/tours");
             setTours(res.data.data.tours || []);
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error("Lỗi fetch tours:", error); }
     };
 
     const handleChange = (e) => {
@@ -88,18 +82,14 @@ const TourForm = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleItineraryChange = (index, value) => {
-        const updatedItinerary = [...formData.itinerary];
-        updatedItinerary[index].content = value;
-        setFormData({ ...formData, itinerary: updatedItinerary });
-    };
-
     const handleFileChange = (e) => {
         const { name, files } = e.target;
         if (name === 'imageCover') {
             const file = files[0];
-            setImageCover(file);
-            setPreviews(p => ({ ...p, cover: file ? URL.createObjectURL(file) : null }));
+            if (file) {
+                setImageCover(file);
+                setPreviews(p => ({ ...p, cover: URL.createObjectURL(file) }));
+            }
         } else if (name === 'images') {
             const selectedFiles = Array.from(files).slice(0, 5);
             setOtherImages(selectedFiles);
@@ -110,18 +100,22 @@ const TourForm = () => {
     const addDate = () => {
         if (!formData.currentDateInput) return;
         if (formData.startDates.includes(formData.currentDateInput)) {
-            alert("❌ Lỗi: Ngày này đã có trong danh sách lịch khởi hành!");
+            setMessage("❌ Ngày này đã có trong danh sách!");
+            setTimeout(() => setMessage(""), 3000);
             return;
         }
-        setFormData({
-            ...formData,
-            startDates: [...formData.startDates, formData.currentDateInput].sort(),
+        setFormData(prev => ({
+            ...prev,
+            startDates: [...prev.startDates, prev.currentDateInput].sort(),
             currentDateInput: ""
-        });
+        }));
     };
 
     const removeDate = (dateToRemove) => {
-        setFormData({ ...formData, startDates: formData.startDates.filter(d => d !== dateToRemove) });
+        setFormData(prev => ({ 
+            ...prev, 
+            startDates: prev.startDates.filter(d => d !== dateToRemove) 
+        }));
     };
 
     const resetForm = () => {
@@ -129,8 +123,7 @@ const TourForm = () => {
         setFormData({
             title: "", destination: "", duration: 1, category: "", price: "",
             maxGroupSize: "", description: "", startLocation: "TP. Hồ Chí Minh", 
-            startDates: [], currentDateInput: "",
-            blogTitle: "", blogDetail: "", blogMeaningfulDescription: "", itinerary: []
+            startDates: [], currentDateInput: ""
         });
         setImageCover(null);
         setOtherImages([]);
@@ -139,8 +132,6 @@ const TourForm = () => {
 
     const handleEdit = (tour) => {
         setEditingTourId(tour._id);
-        
-        // CHỈ nạp dữ liệu Tour, KHÔNG nạp dữ liệu Blog
         setFormData({
             title: tour.title || "",
             destination: tour.destination || "",
@@ -153,77 +144,103 @@ const TourForm = () => {
             startDates: Array.isArray(tour.startDate) 
                 ? tour.startDate.map(date => new Date(date).toISOString().split('T')[0]) 
                 : [],
-            currentDateInput: "",
-            // Reset các trường blog về rỗng khi chỉnh sửa
-            blogTitle: "",
-            blogDetail: "",
-            blogMeaningfulDescription: "",
-            itinerary: [] 
+            currentDateInput: ""
         });
-        
-        // Cuộn lên đầu trang
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleDelete = async (tour) => {
-        if (!window.confirm(`Bạn có chắc muốn xóa: ${tour.title}?`)) return;
-        try {
-            await axios.delete(`http://localhost:5000/api/tours/${tour._id}`, { headers: getAuthHeaders() });
-            setMessage("✅ Xóa tour thành công!");
-            fetchTours();
-        } catch (err) {
-            setMessage(`❌ Lỗi: ${err.response?.data?.message || "Không thể xóa"}`);
-        }
-        setTimeout(() => setMessage(""), 5000);
+    // Hàm mở Modal xác nhận xóa
+    const confirmDelete = (tour) => {
+        setShowConfirm({ show: true, tour });
     };
+
+    // Hàm thực hiện xóa thực sự gọi tới Backend
+   const handleDelete = async () => {
+    const tour = showConfirm.tour;
+    if (!tour) return;
+
+    setDeletingId(tour._id);
+    setShowConfirm({ show: false, tour: null });
+
+    try {
+        // Gửi request xóa
+        await axios.delete(`http://localhost:5000/api/tours/${tour._id}`, { 
+            headers: getAuthHeaders() 
+        });
+
+       
+        setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
+        
+        setMessage(`✅ Xóa tour thành công!`);
+    } catch (err) {
+        // 🛑 XỬ LÝ LỖI 404 (Trường hợp của bạn)
+        if (err.response && err.response.status === 404) {
+            // Nếu 404 nghĩa là server không thấy tour này -> cũng xóa luôn ở UI cho khớp
+            setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
+            setMessage("ℹ️ Tour không tồn tại hoặc đã được xóa trước đó.");
+        } else {
+            setMessage(`❌ Lỗi: ${err.response?.data?.message || "Không thể xóa tour"}`);
+        }
+    } finally {
+        setDeletingId(null);
+        setTimeout(() => setMessage(""), 3000);
+    }
+};
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        try {
-            const tourFormData = new FormData();
-            
-            // Xử lý các trường cơ bản của Tour
-            Object.keys(formData).forEach(key => {
-                if (key === 'startDates') {
-                    formData.startDates.forEach(date => tourFormData.append('startDate', date));
-                } else if (!key.startsWith('blog') && key !== 'itinerary' && key !== 'currentDateInput') {
-                    tourFormData.append(key, formData[key]);
-                }
-            });
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+        const tourFormData = new FormData();
+        tourFormData.append('title', formData.title);
+        tourFormData.append('destination', formData.destination);
+        tourFormData.append('duration', formData.duration);
+        tourFormData.append('category', formData.category);
+        tourFormData.append('price', formData.price);
+        tourFormData.append('maxGroupSize', formData.maxGroupSize);
+        tourFormData.append('description', formData.description);
+        tourFormData.append('startLocation', formData.startLocation);
+        
+        if (formData.startDates.length === 0) {
+            tourFormData.append('startDate', ''); 
+        } else {
+            formData.startDates.forEach(date => tourFormData.append('startDate', date));
+        }
 
-            // CHỈ gửi dữ liệu Blog nếu là THÊM MỚI (không phải đang sửa)
-            if (!editingTourId) {
-                const attractionsString = formData.itinerary.map(item => `Ngày ${item.day}: ${item.content}`).join('\n');
-                tourFormData.append('blogAttractions', attractionsString);
-                tourFormData.append('blogTitle', formData.blogTitle);
-                tourFormData.append('blogDetail', formData.blogDetail);
-                tourFormData.append('blogMeaningfulDescription', formData.blogMeaningfulDescription);
-            }
+        if (imageCover) tourFormData.append('imageCover', imageCover);
+        otherImages.forEach(file => tourFormData.append('images', file));
 
-            if (imageCover) tourFormData.append('imageCover', imageCover);
-            otherImages.forEach(file => tourFormData.append('images', file));
+        const url = editingTourId ? `http://localhost:5000/api/tours/${editingTourId}` : `http://localhost:5000/api/tours`;
+        const method = editingTourId ? 'patch' : 'post';
 
-            const url = editingTourId ? `http://localhost:5000/api/tours/${editingTourId}` : `http://localhost:5000/api/tours`;
-            const method = editingTourId ? 'patch' : 'post';
+        const response = await axios[method](url, tourFormData, {
+            headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
+        });
 
-            await axios[method](url, tourFormData, {
-                headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
-            });
+        const newTourId = response.data.data.tour?._id;
 
-            setMessage(editingTourId ? "✅ Cập nhật tour thành công!" : "✅ Tạo tour thành công!");
+        if (editingTourId) {
+            setMessage("✅ Cập nhật tour thành công!");
             resetForm();
             fetchTours();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } catch (err) {
-            setMessage(`❌ Lỗi: ${err.response?.data?.message || "Thao tác thất bại"}`);
-        } finally {
-            setIsSubmitting(false);
-            setTimeout(() => setMessage(""), 5000);
+        } else {
+            // CẬP NHẬT TẠI ĐÂY: Thông báo và chuyển hướng sang /admin_blog
+            setMessage("✅ Tạo tour thành công! Đang chuyển hướng sang trang Blog...");
+            setTimeout(() => {
+                navigate(`/admin_blog?tourId=${newTourId}`);
+            }, 1500);
         }
-    };
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+        setMessage(`❌ Lỗi: ${err.response?.data?.message || "Thao tác thất bại"}`);
+    } finally {
+        setIsSubmitting(false);
+        if (editingTourId) setTimeout(() => setMessage(""), 5000);
+    }
+};
 
-    if (role !== "admin") return <div className="container mt-5 alert alert-danger">❌ Quyền admin yêu cầu.</div>;
+    if (role !== "admin") return <div className="container mt-5 alert alert-danger text-center shadow-sm">❌ Quyền admin yêu cầu để truy cập trang này.</div>;
 
     return (
         <div className="container mt-5 mb-5 pb-5">
@@ -237,26 +254,48 @@ const TourForm = () => {
                 .form-section { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #edf2f7; }
                 .section-title { font-size: 0.9rem; border-left: 4px solid #0d6efd; padding-left: 12px; margin-bottom: 20px; color: #2d3748; text-transform: uppercase; letter-spacing: 0.5px; }
                 .preview-img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; }
-                .itinerary-day-box { border-left: 3px solid #dee2e6; padding-left: 15px; margin-bottom: 15px; }
-                .sticky-actions { position: sticky; bottom: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 15px; z-index: 1000; border-top: 1px solid #eee; border-radius: 0 0 12px 12px; }
+                .sticky-actions { position: sticky; bottom: 15px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px; z-index: 1000; border: 1px solid #eee; border-radius: 15px; }
+                .animate-spin { animation: spin 1s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
             `}</style>
 
+            {/* MODAL XÁC NHẬN XÓA (THAY CHO ALERT) */}
+            {showConfirm.show && (
+                <div className="modal-overlay">
+                    <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ maxWidth: '400px', border: '1px solid #eee' }}>
+                        <div className="bg-danger-subtle text-danger rounded-circle d-inline-flex p-3 mb-3">
+                            <AlertTriangle size={32} />
+                        </div>
+                        <h5 className="fw-bold mb-2">Xác nhận xóa?</h5>
+                        <p className="text-muted small mb-4">
+                            Bạn có chắc chắn muốn xóa tour <b className="text-dark">{showConfirm.tour?.title}</b>? 
+                            Hành động này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.
+                        </p>
+                        <div className="d-flex gap-2 justify-content-center">
+                            <button className="btn btn-light px-4 fw-600" onClick={() => setShowConfirm({ show: false, tour: null })}>Hủy bỏ</button>
+                            <button className="btn btn-danger px-4 fw-600" onClick={handleDelete}>Đồng ý xóa</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header className="text-center mb-5">
-                <h2 className="fw-bold text-uppercase">{editingTourId ? "🔄 Chỉnh sửa Tour" : "➕ Thêm Mới Tour & Blog"}</h2>
-                <p className="text-muted">Quản lý nội dung Tour chuyên nghiệp</p>
+                <h2 className="fw-bold text-uppercase">{editingTourId ? "🔄 Chỉnh sửa Tour" : "➕ Thêm Mới Tour"}</h2>
+                <p className="text-muted">Thông tin Blog sẽ được tạo ở bước tiếp theo</p>
             </header>
 
             {message && (
                 <div className={`alert fixed-top mx-auto mt-3 shadow-lg border-0 ${message.startsWith('✅') ? 'alert-success' : 'alert-danger'}`} style={{ width: 'fit-content', zIndex: 9999 }}>
                     <div className="d-flex align-items-center gap-2 px-3">
+                        {message.startsWith('✅') ? <CheckCircle2 size={18}/> : <XCircle size={18}/>}
                         {message}
-                        <XCircle size={18} className="cursor-pointer" onClick={() => setMessage("")} />
+                        <XCircle size={18} className="cursor-pointer ms-3" onClick={() => setMessage("")} />
                     </div>
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
-                {/* PHẦN 1: THÔNG TIN CHUNG */}
                 <div className="form-section shadow-sm">
                     <h6 className="section-title fw-bold">1. Thông tin chung</h6>
                     <div className="row g-3">
@@ -290,27 +329,26 @@ const TourForm = () => {
                             </div>
                         </div>
                         <div className="col-md-4">
-                            <label className="form-label fw-bold small text-muted text-primary">THÊM LỊCH KHỞI HÀNH</label>
+                            <label className="form-label fw-bold small text-muted text-primary">LỊCH KHỞI HÀNH</label>
                             <div className="input-group">
                                 <input type="date" className="form-control" value={formData.currentDateInput} onChange={(e) => setFormData({...formData, currentDateInput: e.target.value})} />
                                 <button type="button" className="btn btn-primary" onClick={addDate}><PlusCircle size={18}/></button>
                             </div>
                         </div>
-                        <div className="col-12 d-flex flex-wrap gap-2">
+                        <div className="col-12 d-flex flex-wrap gap-2 mt-2">
                             {formData.startDates.map(date => (
-                                <span key={date} className="badge bg-primary-subtle text-primary border p-2">
+                                <span key={date} className="badge bg-primary-subtle text-primary border p-2 d-flex align-items-center gap-2">
                                     {new Date(date).toLocaleDateString('vi-VN')}
-                                    <XCircle size={14} className="ms-2 cursor-pointer" onClick={() => removeDate(date)} />
+                                    <XCircle size={14} className="cursor-pointer" onClick={() => removeDate(date)} />
                                 </span>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* PHẦN 2: LỊCH TRÌNH CHI TIẾT (Itinerary này của Tour) */}
                 <div className="form-section shadow-sm">
-                    <h6 className="section-title fw-bold">2. Giá & Thời lượng</h6>
-                    <div className="row g-3 mb-4">
+                    <h6 className="section-title fw-bold">2. Giá & Chi tiết</h6>
+                    <div className="row g-3">
                         <div className="col-md-4">
                             <label className="form-label fw-bold small text-muted">THỜI LƯỢNG (NGÀY)</label>
                             <input type="number" name="duration" className="form-control border-primary fw-bold" value={formData.duration} onChange={handleChange} required min="1" />
@@ -323,83 +361,51 @@ const TourForm = () => {
                             <label className="form-label fw-bold small text-muted">KHÁCH TỐI ĐA</label>
                             <input type="number" name="maxGroupSize" className="form-control" value={formData.maxGroupSize} onChange={handleChange} required />
                         </div>
+                        <div className="col-12">
+                            <label className="form-label fw-bold small text-muted">MÔ TẢ TÓM TẮT TOUR</label>
+                            <textarea name="description" className="form-control" rows="3" value={formData.description} onChange={handleChange} required placeholder="Mô tả ngắn hiển thị tại danh sách tour..."></textarea>
+                        </div>
                     </div>
                 </div>
 
-                {/* PHẦN 3: HÌNH ẢNH & BLOG (Ẩn Blog khi Sửa) */}
                 <div className="form-section shadow-sm">
-                    <h6 className="section-title fw-bold">3. Hình ảnh { !editingTourId && "& Blog bài viết" }</h6>
-                    <div className="row g-4 mb-4">
+                    <h6 className="section-title fw-bold">3. Hình ảnh quảng bá</h6>
+                    <div className="row g-4">
                         <div className="col-md-6 border-end">
-                            <label className="form-label fw-bold small">ẢNH BÌA CHÍNH</label>
-                            <input type="file" name="imageCover" className="form-control mb-2" onChange={handleFileChange} />
-                            {previews.cover && <img src={previews.cover} className="preview-img w-100 h-auto" style={{maxHeight:'180px'}} />}
+                            <label className="form-label fw-bold small">ẢNH BÌA CHÍNH (COVER)</label>
+                            <input type="file" name="imageCover" className="form-control mb-2" onChange={handleFileChange} accept="image/*" />
+                            {previews.cover && <img src={previews.cover} alt="Cover" className="preview-img w-100 h-auto" style={{maxHeight:'180px'}} />}
                         </div>
                         <div className="col-md-6">
                             <label className="form-label fw-bold small">ALBUM ẢNH PHỤ</label>
-                            <input type="file" name="images" className="form-control mb-2" onChange={handleFileChange} multiple />
-                            <div className="d-flex flex-wrap gap-2">{previews.others.map((s,i) => <img key={i} src={s} className="preview-img" />)}</div>
+                            <input type="file" name="images" className="form-control mb-2" onChange={handleFileChange} multiple accept="image/*" />
+                            <div className="d-flex flex-wrap gap-2">{previews.others.map((s,i) => <img key={i} src={s} alt="Preview" className="preview-img" />)}</div>
                         </div>
-                    </div>
-                    
-                    <div className="row g-3">
-                        <div className="col-12">
-                            <label className="form-label fw-bold small text-muted">MÔ TẢ NGẮN TOUR</label>
-                            <textarea name="description" className="form-control" rows="2" value={formData.description} onChange={handleChange} required></textarea>
-                        </div>
-
-                        {/* CHỈ HIỆN KHI THÊM MỚI */}
-                        {!editingTourId && (
-                            <>
-                                <hr />
-                                <div className="col-12">
-                                    <label className="form-label fw-bold small">TIÊU ĐỀ BÀI VIẾT (BLOG)</label>
-                                    <input type="text" name="blogTitle" className="form-control" value={formData.blogTitle} onChange={handleChange} />
-                                </div>
-                                <div className="col-12">
-                                    <label className="form-label fw-bold small">CHƯƠNG TRÌNH NỔI BẬT (BLOG)</label>
-                                    <textarea name="blogDetail" className="form-control" rows="4" value={formData.blogDetail} onChange={handleChange}></textarea>
-                                </div>
-                                <div className="bg-light p-3 rounded-3 border">
-                                    <label className="form-label fw-bold mb-3 small">NỘI DUNG LỊCH TRÌNH BLOG (TỪNG NGÀY):</label>
-                                    {formData.itinerary.map((item, index) => (
-                                        <div key={index} className="itinerary-day-box">
-                                            <div className="fw-bold text-primary mb-1 small">NGÀY {item.day}</div>
-                                            <input 
-                                                type="text" 
-                                                className="form-control border-0 shadow-sm" 
-                                                placeholder={`VD: Tham quan bảo tàng, ăn tối trên tàu...`}
-                                                value={item.content}
-                                                onChange={(e) => handleItineraryChange(index, e.target.value)}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
                     </div>
                 </div>
 
                 <div className="sticky-actions shadow-lg d-flex gap-3 justify-content-center">
                     <button type="submit" className={`custom-btn btn-lg px-5 ${editingTourId ? 'btn-update' : 'btn-save'}`} disabled={isSubmitting}>
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : (editingTourId ? "CẬP NHẬT TOUR" : "TẠO TOUR")}
+                        {isSubmitting ? <Loader2 className="animate-spin" /> : (editingTourId ? "LƯU THAY ĐỔI" : "TIẾP TỤC: TẠO BLOG")}
                     </button>
                     {editingTourId && <button type="button" className="custom-btn btn-lg px-4 btn-cancel" onClick={resetForm}>HỦY BỎ</button>}
                 </div>
             </form>
 
             <div className="mt-5">
-                <h4 className="fw-bold mb-4">📋 Danh sách Tour hiện tại</h4>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h4 className="fw-bold mb-0">📋 Quản lý Tour</h4>
+                    <span className="badge bg-dark">{tours.length} Tours</span>
+                </div>
                 <div className="table-responsive shadow-sm border rounded-3 bg-white">
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
                             <tr>
                                 <th className="ps-4">STT</th>
-                                <th>Tiêu đề</th>
-                                <th>Nơi khởi hành</th>
+                                <th>Thông tin Tour</th>
                                 <th>Điểm đến</th>
-                                <th>Giá bán</th>
-                                <th className="text-center">Quản lý</th>
+                                <th>Giá</th>
+                                <th className="text-center">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -408,15 +414,22 @@ const TourForm = () => {
                                     <td className="ps-4 fw-bold text-muted">{index + 1}</td>
                                     <td>
                                         <div className="fw-bold">{tour.title}</div>
-                                        <div className="small text-muted">{tour.duration} Ngày | {tour.category?.name}</div>
+                                        <div className="small text-muted">{tour.duration} Ngày | {tour.category?.name || "N/A"}</div>
                                     </td>
-                                    <td><span className="badge bg-light text-dark border"><Navigation size={12} className="me-1"/> {tour.startLocation}</span></td>
                                     <td><div className="small"><MapPin size={12} className="text-danger me-1"/>{tour.destination}</div></td>
                                     <td className="fw-bold text-danger">{tour.price?.toLocaleString()} đ</td>
                                     <td>
                                         <div className="d-flex justify-content-center gap-2">
-                                            <button className="custom-btn btn-sm btn-edit py-2 px-3" onClick={() => handleEdit(tour)}><Edit3 size={14}/></button>
-                                            <button className="custom-btn btn-sm btn-delete py-2 px-3" onClick={() => handleDelete(tour)}><Trash2 size={14}/></button>
+                                            <button className="custom-btn btn-sm btn-edit py-2 px-3" onClick={() => handleEdit(tour)} disabled={deletingId === tour._id}>
+                                                <Edit3 size={14}/>
+                                            </button>
+                                            <button 
+                                                className="custom-btn btn-sm btn-delete py-2 px-3" 
+                                                onClick={() => confirmDelete(tour)} 
+                                                disabled={deletingId === tour._id}
+                                            >
+                                                {deletingId === tour._id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14}/>}
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
