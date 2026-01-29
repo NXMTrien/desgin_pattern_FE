@@ -404,7 +404,7 @@ const TourDetail = () => {
                     />
 
                     <div className="d-flex gap-2 mb-4">
-                        {images.slice(0, 5).map((img, index) => (
+                        {images.slice(0, 6).map((img, index) => (
                             <img
                                 key={index}
                                 src={`http://localhost:5000/img/tours/${img}`}

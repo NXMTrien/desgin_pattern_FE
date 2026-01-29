@@ -3,8 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { 
-    Upload, Image, Loader2, MapPin, Edit3, 
-    Trash2, XCircle, PlusCircle, Navigation, CheckCircle2, AlertTriangle
+    Upload, Image, Loader2, Edit3, 
+    Trash2, XCircle, PlusCircle, CheckCircle2, AlertTriangle
 } from 'lucide-react';
 
 const VIETNAM_PROVINCES = [
@@ -27,7 +27,7 @@ const TourForm = () => {
     const navigate = useNavigate();
     const [editingTourId, setEditingTourId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
-    const [showConfirm, setShowConfirm] = useState({ show: false, tour: null }); // State cho Modal xác nhận xóa
+    const [showConfirm, setShowConfirm] = useState({ show: false, tour: null }); 
     
     const [formData, setFormData] = useState({
         title: "", destination: "", duration: 1, category: "", price: "",
@@ -149,96 +149,76 @@ const TourForm = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Hàm mở Modal xác nhận xóa
     const confirmDelete = (tour) => {
         setShowConfirm({ show: true, tour });
     };
 
-    // Hàm thực hiện xóa thực sự gọi tới Backend
-   const handleDelete = async () => {
-    const tour = showConfirm.tour;
-    if (!tour) return;
-
-    setDeletingId(tour._id);
-    setShowConfirm({ show: false, tour: null });
-
-    try {
-        // Gửi request xóa
-        await axios.delete(`http://localhost:5000/api/tours/${tour._id}`, { 
-            headers: getAuthHeaders() 
-        });
-
-       
-        setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
-        
-        setMessage(`✅ Xóa tour thành công!`);
-    } catch (err) {
-        // 🛑 XỬ LÝ LỖI 404 (Trường hợp của bạn)
-        if (err.response && err.response.status === 404) {
-            // Nếu 404 nghĩa là server không thấy tour này -> cũng xóa luôn ở UI cho khớp
+    const handleDelete = async () => {
+        const tour = showConfirm.tour;
+        if (!tour) return;
+        setDeletingId(tour._id);
+        setShowConfirm({ show: false, tour: null });
+        try {
+            await axios.delete(`http://localhost:5000/api/tours/${tour._id}`, { headers: getAuthHeaders() });
             setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
-            setMessage("ℹ️ Tour không tồn tại hoặc đã được xóa trước đó.");
-        } else {
-            setMessage(`❌ Lỗi: ${err.response?.data?.message || "Không thể xóa tour"}`);
+            setMessage(`✅ Xóa tour thành công!`);
+        } catch (err) {
+            if (err.response && err.response.status === 404) {
+                setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
+                setMessage("ℹ️ Tour không tồn tại hoặc đã được xóa trước đó.");
+            } else {
+                setMessage(`❌ Lỗi: ${err.response?.data?.message || "Không thể xóa tour"}`);
+            }
+        } finally {
+            setDeletingId(null);
+            setTimeout(() => setMessage(""), 3000);
         }
-    } finally {
-        setDeletingId(null);
-        setTimeout(() => setMessage(""), 3000);
-    }
-};
+    };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-        const tourFormData = new FormData();
-        tourFormData.append('title', formData.title);
-        tourFormData.append('destination', formData.destination);
-        tourFormData.append('duration', formData.duration);
-        tourFormData.append('category', formData.category);
-        tourFormData.append('price', formData.price);
-        tourFormData.append('maxGroupSize', formData.maxGroupSize);
-        tourFormData.append('description', formData.description);
-        tourFormData.append('startLocation', formData.startLocation);
-        
-        if (formData.startDates.length === 0) {
-            tourFormData.append('startDate', ''); 
-        } else {
-            formData.startDates.forEach(date => tourFormData.append('startDate', date));
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const tourFormData = new FormData();
+            tourFormData.append('title', formData.title);
+            tourFormData.append('destination', formData.destination);
+            tourFormData.append('duration', formData.duration);
+            tourFormData.append('category', formData.category);
+            tourFormData.append('price', formData.price);
+            tourFormData.append('maxGroupSize', formData.maxGroupSize);
+            tourFormData.append('description', formData.description);
+            tourFormData.append('startLocation', formData.startLocation);
+            if (formData.startDates.length === 0) {
+                tourFormData.append('startDate', ''); 
+            } else {
+                formData.startDates.forEach(date => tourFormData.append('startDate', date));
+            }
+            if (imageCover) tourFormData.append('imageCover', imageCover);
+            otherImages.forEach(file => tourFormData.append('images', file));
+
+            const url = editingTourId ? `http://localhost:5000/api/tours/${editingTourId}` : `http://localhost:5000/api/tours`;
+            const method = editingTourId ? 'patch' : 'post';
+            const response = await axios[method](url, tourFormData, {
+                headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
+            });
+            const newTourId = response.data.data.tour?._id;
+
+            if (editingTourId) {
+                setMessage("✅ Cập nhật tour thành công!");
+                resetForm();
+                fetchTours();
+            } else {
+                setMessage("✅ Tạo tour thành công! Đang chuyển hướng sang trang Blog...");
+                setTimeout(() => { navigate(`/admin_blog?tourId=${newTourId}`); }, 1500);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+            setMessage(`❌ Lỗi: ${err.response?.data?.message || "Thao tác thất bại"}`);
+        } finally {
+            setIsSubmitting(false);
+            if (editingTourId) setTimeout(() => setMessage(""), 5000);
         }
-
-        if (imageCover) tourFormData.append('imageCover', imageCover);
-        otherImages.forEach(file => tourFormData.append('images', file));
-
-        const url = editingTourId ? `http://localhost:5000/api/tours/${editingTourId}` : `http://localhost:5000/api/tours`;
-        const method = editingTourId ? 'patch' : 'post';
-
-        const response = await axios[method](url, tourFormData, {
-            headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
-        });
-
-        const newTourId = response.data.data.tour?._id;
-
-        if (editingTourId) {
-            setMessage("✅ Cập nhật tour thành công!");
-            resetForm();
-            fetchTours();
-        } else {
-            // CẬP NHẬT TẠI ĐÂY: Thông báo và chuyển hướng sang /admin_blog
-            setMessage("✅ Tạo tour thành công! Đang chuyển hướng sang trang Blog...");
-            setTimeout(() => {
-                navigate(`/admin_blog?tourId=${newTourId}`);
-            }, 1500);
-        }
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-        setMessage(`❌ Lỗi: ${err.response?.data?.message || "Thao tác thất bại"}`);
-    } finally {
-        setIsSubmitting(false);
-        if (editingTourId) setTimeout(() => setMessage(""), 5000);
-    }
-};
+    };
 
     if (role !== "admin") return <div className="container mt-5 alert alert-danger text-center shadow-sm">❌ Quyền admin yêu cầu để truy cập trang này.</div>;
 
@@ -260,7 +240,6 @@ const TourForm = () => {
                 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
             `}</style>
 
-            {/* MODAL XÁC NHẬN XÓA (THAY CHO ALERT) */}
             {showConfirm.show && (
                 <div className="modal-overlay">
                     <div className="bg-white p-4 rounded-4 shadow-lg text-center" style={{ maxWidth: '400px', border: '1px solid #eee' }}>
@@ -270,7 +249,7 @@ const TourForm = () => {
                         <h5 className="fw-bold mb-2">Xác nhận xóa?</h5>
                         <p className="text-muted small mb-4">
                             Bạn có chắc chắn muốn xóa tour <b className="text-dark">{showConfirm.tour?.title}</b>? 
-                            Hành động này không thể hoàn tác và sẽ xóa dữ liệu khỏi hệ thống.
+                            Hành động này không thể hoàn tác.
                         </p>
                         <div className="d-flex gap-2 justify-content-center">
                             <button className="btn btn-light px-4 fw-600" onClick={() => setShowConfirm({ show: false, tour: null })}>Hủy bỏ</button>
@@ -312,21 +291,21 @@ const TourForm = () => {
                         </div>
                         <div className="col-md-4">
                             <label className="form-label fw-bold small text-muted">ĐIỂM ĐẾN</label>
-                            <div className="input-group">
-                                <span className="input-group-text"><MapPin size={16}/></span>
-                                <input type="text" name="destination" className="form-control" value={formData.destination} onChange={handleChange} required />
-                            </div>
+                            <select name="destination" className="form-select" value={formData.destination} onChange={handleChange} required>
+                                <option value="">-- Chọn điểm đến --</option>
+                                {VIETNAM_PROVINCES.map(province => (
+                                    <option key={province} value={province}>{province}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="col-md-4">
                             <label className="form-label fw-bold small text-muted">NƠI KHỞI HÀNH</label>
-                            <div className="input-group">
-                                <span className="input-group-text"><Navigation size={16}/></span>
-                                <select name="startLocation" className="form-select" value={formData.startLocation} onChange={handleChange} required>
-                                    {VIETNAM_PROVINCES.map(province => (
-                                        <option key={province} value={province}>{province}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <select name="startLocation" className="form-select" value={formData.startLocation} onChange={handleChange} required>
+                                <option value="">-- Chọn nơi đi --</option>
+                                {VIETNAM_PROVINCES.map(province => (
+                                    <option key={province} value={province}>{province}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="col-md-4">
                             <label className="form-label fw-bold small text-muted text-primary">LỊCH KHỞI HÀNH</label>
@@ -363,7 +342,7 @@ const TourForm = () => {
                         </div>
                         <div className="col-12">
                             <label className="form-label fw-bold small text-muted">MÔ TẢ TÓM TẮT TOUR</label>
-                            <textarea name="description" className="form-control" rows="3" value={formData.description} onChange={handleChange} required placeholder="Mô tả ngắn hiển thị tại danh sách tour..."></textarea>
+                            <textarea name="description" className="form-control" rows="3" value={formData.description} onChange={handleChange} required placeholder="Mô tả ngắn..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -416,7 +395,7 @@ const TourForm = () => {
                                         <div className="fw-bold">{tour.title}</div>
                                         <div className="small text-muted">{tour.duration} Ngày | {tour.category?.name || "N/A"}</div>
                                     </td>
-                                    <td><div className="small"><MapPin size={12} className="text-danger me-1"/>{tour.destination}</div></td>
+                                    <td><div className="small">{tour.destination}</div></td>
                                     <td className="fw-bold text-danger">{tour.price?.toLocaleString()} đ</td>
                                     <td>
                                         <div className="d-flex justify-content-center gap-2">
