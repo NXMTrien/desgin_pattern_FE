@@ -45,18 +45,19 @@ const TourForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        const storedUserString = localStorage.getItem("user");
-        let userRole = "guest";
-        if (storedUserString) {
-            try {
-                const storedUser = JSON.parse(storedUserString);
-                if (storedUser?.role) userRole = storedUser.role;
-            } catch (e) { console.error(e); }
-        }
+    const userRole = localStorage.getItem("role");
+    
+    if (userRole) {
         setRole(userRole);
+    } else {
+        setRole("guest");
+    }
+
+    if (userRole === "admin") {
         fetchCategories();
         fetchTours();
-    }, []);
+    }
+}, []);
 
     const getAuthHeaders = () => {
         const token = localStorage.getItem("token");
