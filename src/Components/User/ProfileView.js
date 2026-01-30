@@ -27,7 +27,7 @@ export default function ProfilePage() {
             const token = localStorage.getItem('token');
             if (!token) { navigate('/login'); return; }
 
-            const response = await axios.get('http://localhost:5000/api/auth/me', {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -51,7 +51,7 @@ export default function ProfilePage() {
         try {
             const token = localStorage.getItem('token');
             // Gửi API cập nhật dữ liệu
-            await axios.patch(`http://localhost:5000/api/auth/update-me`, formData, {
+            await axios.patch(`${process.env.REACT_APP_API_URL}/api/auth/update-me`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             

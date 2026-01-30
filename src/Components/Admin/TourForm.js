@@ -65,14 +65,14 @@ const TourForm = () => {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get("http://localhost:5000/api/categories", { headers: getAuthHeaders() });
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/categories`, { headers: getAuthHeaders() });
             setCategories(res.data.data.categories || []);
         } catch (error) { console.error("Lỗi fetch categories:", error); }
     };
 
     const fetchTours = async () => {
         try {
-            const res = await axios.get("http://localhost:5000/api/tours");
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/tours`);
             setTours(res.data.data.tours || []);
         } catch (error) { console.error("Lỗi fetch tours:", error); }
     };
@@ -159,7 +159,7 @@ const TourForm = () => {
         setDeletingId(tour._id);
         setShowConfirm({ show: false, tour: null });
         try {
-            await axios.delete(`http://localhost:5000/api/tours/${tour._id}`, { headers: getAuthHeaders() });
+            await axios.delete(`${process.env.REACT_APP_API_URL}/api/tours/${tour._id}`, { headers: getAuthHeaders() });
             setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
             setMessage(`✅ Xóa tour thành công!`);
         } catch (err) {
@@ -196,7 +196,7 @@ const TourForm = () => {
             if (imageCover) tourFormData.append('imageCover', imageCover);
             otherImages.forEach(file => tourFormData.append('images', file));
 
-            const url = editingTourId ? `http://localhost:5000/api/tours/${editingTourId}` : `http://localhost:5000/api/tours`;
+            const url = editingTourId ? `${process.env.REACT_APP_API_URL}/api/tours/${editingTourId}` : `${process.env.REACT_APP_API_URL}/api/tours`;
             const method = editingTourId ? 'patch' : 'post';
             const response = await axios[method](url, tourFormData, {
                 headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }

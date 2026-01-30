@@ -44,7 +44,7 @@ function ForgotPassword() {
         if (!email) return setError("Vui lòng nhập email.");
         setLoading(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, { email });
             setSuccess(res.data.message);
             setStep(2);
         } catch (err) {
@@ -66,7 +66,7 @@ function ForgotPassword() {
         setLoading(true);
         try {
             const finalOtp = otp.join("");
-            const res = await axios.post("http://localhost:5000/api/auth/reset-password", {
+            const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/reset-password`, {
                 email, otp: finalOtp, newPassword
             });
             setSuccess(res.data.message);

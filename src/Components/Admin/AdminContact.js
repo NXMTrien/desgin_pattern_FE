@@ -11,7 +11,7 @@ const AdminContact = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/contacts', {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/contacts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(res.data.data);

@@ -17,7 +17,7 @@ function CategoryForm() {
   const fetchCategories = async () => {
   try {
     const token = localStorage.getItem("token"); // lấy token đã login
-    const res = await axios.get("http://localhost:5000/api/categories", {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/categories`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -36,7 +36,7 @@ const handleSubmit = async (e) => {
   try {
     const token = localStorage.getItem("token"); // lấy token đã login
     const res = await axios.post(
-      "http://localhost:5000/api/tours/categories",
+      `${process.env.REACT_APP_API_URL}/api/tours/categories`,
       { name, description },
       {
         headers: {

@@ -10,7 +10,7 @@ const AdminPaymentConfirmation = () => {
     const [error, setError] = useState('');
     const [confirmationMessage, setConfirmationMessage] = useState('');
 
-    const API_URL = 'http://localhost:5000/api';
+    const API_URL = `${process.env.REACT_APP_API_URL}/api`;
 
     // Giả định hàm lấy headers (cần có role Admin)
     const getAuthHeaders = () => {

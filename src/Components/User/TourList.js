@@ -33,14 +33,14 @@ const TourList = () => {
     const [form, setForm] = useState({ numberOfPeople: 1, startDate: "", endDate: "" });
     const [errors, setErrors] = useState("");
 
-    const API_URL = 'http://localhost:5000/api';
+    const API_URL = process.env.REACT_APP_API_URL;
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
         const fetchTours = async () => {
             try {
-                const res = await axios.get(`${API_URL}/tours`);
+                const res = await axios.get(`${API_URL}/api/tours`);
                 const allTours = res.data.data.tours || [];
                 const params = new URLSearchParams(location.search);
                 const dest = params.get("destination");
@@ -154,7 +154,7 @@ const TourList = () => {
     const handleConfirmBooking = async () => {
         const token = localStorage.getItem("token");
         try {
-            await axios.post(`${API_URL}/bookings`, {
+            await axios.post(`${API_URL}/api/bookings`, {
                 tour: selectedTour._id,
                 numberOfPeople: Number(form.numberOfPeople),
                 startDate: form.startDate,
@@ -312,7 +312,7 @@ const TourList = () => {
                                         <Row className="g-0">
                                             <Col md={4}>
                                                 <Card.Img 
-                                                    src={tour.imageCover ? `http://localhost:5000/img/tours/${tour.imageCover}` : 'https://via.placeholder.com/400x250'} 
+                                                    src={tour.imageCover ? `${process.env.REACT_APP_API_URL}/img/tours/${tour.imageCover}` : 'https://via.placeholder.com/400x250'} 
                                                     style={{ height: '100%', objectFit: 'cover', minHeight: '220px' }} 
                                                 />
                                             </Col>

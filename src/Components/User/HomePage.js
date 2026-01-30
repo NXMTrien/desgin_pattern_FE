@@ -13,7 +13,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchSuggestedTours = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/tours");
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/tours`);
         const data = await res.json();
         if (data.status === "success") {
           const limitedTours = (data.data.tours || []).slice(0, 8);
@@ -29,15 +29,22 @@ export default function HomePage() {
 
   // 2. Fetch dữ liệu cho phần TOP RATED (Giữ nguyên của bạn)
   useEffect(() => {
-    setLoading(true);
-    fetch("http://localhost:5000/api/tours/top-5-rated")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "success") setTours(data.data.tours || []);
-      })
-      .catch((err) => console.error("Lỗi fetch top tours:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  setLoading(true);
+  fetch(`${process.env.REACT_APP_API_URL}/api/tours/top-5-rated`)
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("API error");
+      }
+      return res.json();
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        setTours(data.data.tours || []);
+      }
+    })
+    .catch((err) => console.error("Lỗi fetch top tours:", err))
+    .finally(() => setLoading(false));
+}, []);
 
   // Dữ liệu đã tối ưu size để Grid luôn khít
   const allDestinations = [
@@ -223,18 +230,18 @@ export default function HomePage() {
     budget: "",
   });
 
-  useEffect(() => {
-    setLoading(true);
-    fetch("http://localhost:5000/api/tours/top-5-rated")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "success") {
-          setTours(data.data.tours || []);
-        }
-      })
-      .catch((err) => console.error("Lỗi fetch top tours:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   setLoading(true);
+  //   fetch(`${process.env.REACT_APP_API_URL}/api/tours/top-5-rated`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       if (data.status === "success") {
+  //         setTours(data.data.tours || []);
+  //       }
+  //     })
+  //     .catch((err) => console.error("Lỗi fetch top tours:", err))
+  //     .finally(() => setLoading(false));
+  // }, []);
 
   const handleSearch = () => {
     const queryParams = new URLSearchParams({
@@ -514,7 +521,7 @@ export default function HomePage() {
                     <img
                       className="card-img-top"
                       style={{ height: "200px", objectFit: "cover" }}
-                      src={tour.imageCover ? `http://localhost:5000/img/tours/${tour.imageCover}` : `https://picsum.photos/seed/${i}/600/400`}
+                      src={tour.imageCover ? `${process.env.REACT_APP_API_URL}/img/tours/${tour.imageCover}` : `https://picsum.photos/seed/${i}/600/400`}
                       alt={tour.title}
                     />
                     <div className="card-body d-flex flex-column">
@@ -617,7 +624,7 @@ export default function HomePage() {
                       {/* MẶT SAU: Hình ảnh từ Database */}
                       <div className="flip-card-back">
                         <img 
-                          src={tour.imageCover ? `http://localhost:5000/img/tours/${tour.imageCover}` : "https://picsum.photos/400/600"} 
+                          src={tour.imageCover ? `${process.env.REACT_APP_API_URL}/img/tours/${tour.imageCover}` : "https://picsum.photos/400/600"} 
                           alt={tour.title} 
                         />
                         <div className="position-absolute top-50 start-50 translate-middle w-100 text-center">
@@ -639,6 +646,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      
     </div>
   );
 }

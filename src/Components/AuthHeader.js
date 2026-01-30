@@ -14,7 +14,7 @@ function AuthHeader() {
     const fetchUserData = async () => {
       if (token) {
         try {
-          const response = await axios.get('http://localhost:5000/api/auth/me', {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setCurrentUser(response.data);

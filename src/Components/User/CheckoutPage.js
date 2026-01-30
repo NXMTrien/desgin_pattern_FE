@@ -20,7 +20,7 @@ const CheckoutBankPage = () => {
         expiryDate: ""
     });
 
-    const API_URL = "http://localhost:5000/api";
+    const API_URL =process.env.REACT_APP_API_URL;
 
     // Danh sách ngân hàng với quy định độ dài số tài khoản/số thẻ
     const bankList = [

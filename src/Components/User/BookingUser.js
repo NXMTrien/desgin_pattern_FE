@@ -31,7 +31,7 @@ const MyBookings = () => {
                 const token = localStorage.getItem('token');
                 if (!token) { navigate('/login'); return; }
 
-                const response = await axios.get('http://localhost:5000/api/bookings/my-bookings', {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/bookings/my-bookings`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

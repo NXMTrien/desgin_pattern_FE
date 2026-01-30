@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-const API_URL = 'http://localhost:5000/api/blogs';
+const API_URL = `${process.env.REACT_APP_API_URL}/api/blogs`;
 
 const AdminBlogPage = () => {
     const [searchParams] = useSearchParams();
@@ -34,7 +34,7 @@ const AdminBlogPage = () => {
     const fetchTourDetail = async (id) => {
         setIsLoadingTour(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/tours/${id}`);
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/tours/${id}`);
             const tourData = res.data.data.tour;
             
             setTourDuration(tourData.duration || 0);

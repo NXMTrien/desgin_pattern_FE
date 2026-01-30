@@ -13,7 +13,7 @@ function AdminCustomTourPage() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/custom-tours', {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/custom-tours`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setRequests(res.data.data.requests);
@@ -32,7 +32,7 @@ function AdminCustomTourPage() {
   const handleSubmit = async () => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/custom-tours/${selected._id}/confirm`,
+        `${process.env.REACT_APP_API_URL}/api/custom-tours/${selected._id}/confirm`,
         {
            numberOfPeople: formData.numberOfPeople,
             startDate: formData.startDate,

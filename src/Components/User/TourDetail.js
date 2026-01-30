@@ -38,7 +38,7 @@ const ReviewSection = ({ tourId }) => {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.get(
-                `http://localhost:5000/api/tours/${tourId}/reviews`,
+                `${process.env.REACT_APP_API_URL}/api/tours/${tourId}/reviews`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setReviews(res.data.data.reviews || []);
@@ -74,7 +74,7 @@ const ReviewSection = ({ tourId }) => {
         setError("");
         try {
             await axios.post(
-                `http://localhost:5000/api/tours/${tourId}/reviews`,
+                `${process.env.REACT_APP_API_URL}/api/tours/${tourId}/reviews`,
                 { rating, comment },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -306,10 +306,10 @@ const TourDetail = () => {
     useEffect(() => {
         const fetchTour = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/tours/${id}`);
+                const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/tours/${id}`);
                 const data = res.data.data.tour;
                 setTour(data);
-                setMainImage(`http://localhost:5000/img/tours/${data.imageCover}`);
+                setMainImage(`${process.env.REACT_APP_API_URL}/img/tours/${data.imageCover}`);
                 fetchBlog(data._id);
             } catch (err) {
                 setErrors("Không thể tải thông tin Tour.");
@@ -320,7 +320,7 @@ const TourDetail = () => {
 
     const fetchBlog = async (tourId) => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/blogs/by-tour/${tourId}`);
+            const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/blogs/by-tour/${tourId}`);
             setBlog(res.data.data.blog);
         } catch (err) {
             setBlog(null);
@@ -362,7 +362,7 @@ const TourDetail = () => {
 
         try {
             const res = await axios.post(
-                `http://localhost:5000/api/bookings`,
+                `${process.env.REACT_APP_API_URL}/api/bookings`,
                 {
                     tour: tour._id,
                     numberOfPeople: Number(form.numberOfPeople),

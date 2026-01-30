@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Form, Alert } from 'react-bootstrap';
 
-const API_URL = 'http://localhost:5000/api/custom-tours';
+const API_URL = `${process.env.REACT_APP_API_URL}/api/custom-tours`;
 
 const CustomTourPage = () => {
   const [formData, setFormData] = useState({

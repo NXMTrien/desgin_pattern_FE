@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = `${process.env.REACT_APP_API_URL}/api/auth`;
 
 const getAuthHeaders = () => {
     // Lưu ý: Đảm bảo key trong localStorage khớp với App.js (thường là authToken)

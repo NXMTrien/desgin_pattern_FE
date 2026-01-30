@@ -15,7 +15,7 @@ function LoginForm() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, { email, password });
       if (res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("role", res.data.role);
@@ -28,7 +28,7 @@ function LoginForm() {
 
   const onGoogleSuccess = async (credentialResponse) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/google-login", {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/google-login`, {
         idToken: credentialResponse.credential 
       });
       handleLoginSuccess(res.data);

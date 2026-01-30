@@ -41,7 +41,7 @@ const ContactPage = () => {
 
     try {
       // Thay đổi URL này thành URL API thật của bạn
-      const response = await axios.post('http://localhost:5000/api/contacts', formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/contacts`, formData);
       
       if (response.data.status === 'success') {
         setStatus({ type: 'success', msg: '✅ Cảm ơn bạn! Phản hồi của bạn đã được gửi thành công.' });
