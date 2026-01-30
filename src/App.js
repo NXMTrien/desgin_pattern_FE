@@ -75,7 +75,7 @@ export default function App() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="292302259329-j3g04hfov9h6u3e138v4cjdue3j1p86t.apps.googleusercontent.com">
+
     <div className="bg-light min-vh-100">
       <AuthHeader isLoggedIn={isLoggedIn} onLogout={handleLogout} username={currentUser?.username} />
 
@@ -108,6 +108,5 @@ export default function App() {
 
       <div id="custom-alert" className="fixed-bottom end-0 text-white p-3 rounded-start shadow-lg z-3 d-none"></div>
     </div>
-    </GoogleOAuthProvider>
   );
 }
