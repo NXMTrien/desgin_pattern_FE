@@ -407,13 +407,13 @@ const TourDetail = () => {
                         {images.slice(0, 6).map((img, index) => (
                             <img
                                 key={index}
-                                src={`http://localhost:5000/img/tours/${img}`}
+                                src={`${process.env.REACT_APP_API_URL}/img/tours/${img}`}
                                 className="rounded border shadow-sm"
                                 style={{
                                     height: "80px", width: "80px", objectFit: "cover", cursor: "pointer",
                                     border: mainImage?.endsWith(img) ? '3px solid #007bff' : '1px solid #ddd'
                                 }}
-                                onClick={() => setMainImage(`http://localhost:5000/img/tours/${img}`)}
+                                onClick={() => setMainImage(`${process.env.REACT_APP_API_URL}/img/tours/${img}`)}
                                 alt="thumb"
                             />
                         ))}
