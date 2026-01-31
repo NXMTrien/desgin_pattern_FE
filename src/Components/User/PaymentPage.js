@@ -19,7 +19,7 @@ const PaymentPage = () => {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/bookings/my-bookings`, {
+      const res = await axios.get(`${API_URL}/api/bookings/my-bookings`, {
         headers: getAuthHeaders(),
       });
       const all = res.data.data.bookings || [];
@@ -46,7 +46,7 @@ const PaymentPage = () => {
   const handleCancel = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn hủy đặt tour này không?")) {
       try {
-        await axios.patch(`${API_URL}/bookings/cancel/${id}`, {}, {
+        await axios.patch(`${API_URL}/api/bookings/cancel/${id}`, {}, {
           headers: getAuthHeaders(),
         });
         alert("Hủy tour thành công! Email thông báo đã được gửi.");

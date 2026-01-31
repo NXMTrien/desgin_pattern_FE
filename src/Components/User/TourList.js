@@ -40,6 +40,7 @@ const TourList = () => {
     useEffect(() => {
         const fetchTours = async () => {
             try {
+                // Thêm timestamp để tránh cache trình duyệt khi fetch
                 const res = await axios.get(`${API_URL}/api/tours`);
                 const allTours = res.data.data.tours || [];
                 const params = new URLSearchParams(location.search);
@@ -63,7 +64,7 @@ const TourList = () => {
             }
         };
         fetchTours();
-    }, [location.search]);
+    }, [location.search, API_URL]);
 
     const handleApplyFilter = () => {
         let result = [...tours];
@@ -74,11 +75,12 @@ const TourList = () => {
         else if (searchFilter.budget === "10-20") result = result.filter(t => t.price > 10000000 && t.price <= 20000000);
         else if (searchFilter.budget === "above20") result = result.filter(t => t.price > 20000000);
 
-        // 2. Lọc theo Đánh giá
+        // 2. Lọc theo Đánh giá (Đồng bộ với số thập phân)
         if (searchFilter.rating !== "") {
             const selectedRating = Number(searchFilter.rating);
             result = result.filter(t => {
-                const tourRating = t.ratingsAverage || t.averageRating || 5; 
+                const tourRating = t.averageRating || t.ratingsAverage || 0; 
+                // Chọn 4 sao sẽ hiện tour từ 4.0 đến 4.9
                 return Math.floor(tourRating) === selectedRating;
             });
         }
@@ -321,8 +323,10 @@ const TourList = () => {
                                                     <div className="flex-grow-1">
                                                         <div className="d-flex justify-content-between align-items-start">
                                                             <Card.Title className="fw-bold fs-5 mb-2 text-primary">{tour.title}</Card.Title>
-                                                            <div className="bg-warning px-2 py-1 rounded small fw-bold">
-                                                              {tour.averageRating || 5} <i className="bi bi-star-fill"></i>
+                                                            {/* HIỂN THỊ ĐÁNH GIÁ ĐỒNG NHẤT 3.5 */}
+                                                            <div className="bg-warning px-2 py-1 rounded small fw-bold d-flex align-items-center">
+                                                                <i className="bi bi-star-fill me-1" style={{fontSize: '0.8rem'}}></i>
+                                                                {Number(tour.averageRating || tour.ratingsAverage || 0).toFixed(1)}
                                                             </div>
                                                         </div>
                                                         <Row className="small text-secondary mt-3">
@@ -335,6 +339,7 @@ const TourList = () => {
                                                                         {new Date(d).toLocaleDateString('vi-VN')}
                                                                     </span>
                                                                 ))}
+                                                                {tour.startDate?.length > 2 && <span className="small text-muted">...</span>}
                                                             </Col>
                                                             <Col xs={6}><i className="bi bi-map me-2"></i>Từ: {tour.startLocation || "Liên hệ"}</Col>
                                                             <Col xs={6}><i className="bi bi-people me-2"></i>Chỗ: {tour.maxGroupSize} người</Col>

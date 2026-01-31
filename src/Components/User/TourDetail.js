@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Alert, Card, Modal, Accordion, Spinner } from 'react-bootstrap';
@@ -26,15 +26,16 @@ const NotificationModal = ({ show, onHide, title, message, variant }) => (
 const ReviewSection = ({ tourId }) => {
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(5);
+    const [hoverRating, setHoverRating] = useState(0); // Thêm hover cho sao
     const [comment, setComment] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    
 
-    // Trạng thái cho thông báo Modal
     const [showNotify, setShowNotify] = useState(false);
     const [notifyData, setNotifyData] = useState({ title: "", message: "", variant: "success" });
 
-    const fetchReviews = async () => {
+    const fetchReviews = useCallback(async () => {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.get(
@@ -45,11 +46,11 @@ const ReviewSection = ({ tourId }) => {
         } catch (err) {
             console.error("Lỗi lấy đánh giá:", err);
         }
-    };
+    }, [tourId]);
 
     useEffect(() => {
         if (tourId) fetchReviews();
-    }, [tourId]);
+    }, [tourId, fetchReviews]);
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
@@ -82,15 +83,12 @@ const ReviewSection = ({ tourId }) => {
             setComment("");
             setRating(5);
             fetchReviews();
-
-            // Hiển thị thông báo thành công thay cho alert
             setNotifyData({
                 title: "Thành công!",
                 message: "Cảm ơn bạn đã để lại đánh giá cho chuyến đi này.",
                 variant: "success"
             });
             setShowNotify(true);
-
         } catch (err) {
             setNotifyData({
                 title: "Gửi thất bại",
@@ -105,11 +103,7 @@ const ReviewSection = ({ tourId }) => {
 
     return (
         <div className="mt-5 border-top pt-4">
-            <NotificationModal 
-                show={showNotify} 
-                onHide={() => setShowNotify(false)}
-                {...notifyData}
-            />
+            <NotificationModal show={showNotify} onHide={() => setShowNotify(false)} {...notifyData} />
 
             <h3 className="mb-4 d-flex align-items-center fw-bold text-dark">
                 <MessageSquare className="me-2 text-primary" /> Đánh giá từ khách hàng ({reviews.length})
@@ -127,10 +121,12 @@ const ReviewSection = ({ tourId }) => {
                                     <Star
                                         key={num}
                                         size={28}
-                                        style={{ cursor: "pointer" }}
-                                        fill={num <= rating ? "#ffc107" : "none"}
-                                        color={num <= rating ? "#ffc107" : "#ccc"}
+                                        style={{ cursor: "pointer", transition: "0.2s" }}
+                                        fill={(hoverRating || rating) >= num ? "#ffc107" : "none"}
+                                        color={(hoverRating || rating) >= num ? "#ffc107" : "#ccc"}
                                         onClick={() => setRating(num)}
+                                        onMouseEnter={() => setHoverRating(num)}
+                                        onMouseLeave={() => setHoverRating(0)}
                                     />
                                 ))}
                             </div>
@@ -223,48 +219,47 @@ const BlogContent = ({ blog }) => {
         const parts = text.split(/(?=Ngày \d+)/g).filter(p => p.trim() !== "");
         
         return (
-            <Accordion 
-                activeKey={activeKey} 
-                onSelect={(k) => setActiveKey(k)} 
-                flush 
-                className="border rounded shadow-sm overflow-hidden"
-            >
-                {parts.map((part, index) => {
-                    const lines = part.trim().split('\n');
-                    const dayTitle = lines[0]; 
-                    const dayDescription = lines.slice(1).join('\n'); 
-                    const isOpening = activeKey === index.toString();
+            <>
+                <style>{`
+                    .custom-accordion .accordion-button {
+                        background-color: white !important;
+                        color: #212529 !important;
+                        font-weight: 700 !important;
+                        box-shadow: none !important;
+                    }
+                    .custom-accordion .accordion-button:not(.collapsed) {
+                        background-color: #007bff !important;
+                        color: white !important;
+                        transition: all 0.3s ease;
+                    }
+                    .custom-accordion .accordion-button:not(.collapsed)::after {
+                        filter: brightness(0) invert(1);
+                    }
+                `}</style>
+                <Accordion 
+                    activeKey={activeKey} 
+                    onSelect={(k) => setActiveKey(k)} 
+                    flush 
+                    className="border rounded shadow-sm overflow-hidden custom-accordion"
+                >
+                    {parts.map((part, index) => {
+                        const lines = part.trim().split('\n');
+                        const dayTitle = lines[0]; 
+                        const dayDescription = lines.slice(1).join('\n'); 
 
-                    return (
-                        <Accordion.Item eventKey={index.toString()} key={index}>
-                            <Accordion.Header>
-                                <span className={`fw-bold ${isOpening ? 'text-white' : 'text-dark'}`}>
-                                    {dayTitle}
-                                </span>
-                                <style>{`
-                                    .accordion-item:nth-child(${index + 1}) .accordion-button {
-                                        background-color: white !important;
-                                        color: #212529 !important;
-                                        font-weight: 700 !important;
-                                        box-shadow: none !important;
-                                    }
-                                    .accordion-item:nth-child(${index + 1}) .accordion-button:not(.collapsed) {
-                                        background-color: #007bff !important;
-                                        color: white !important;
-                                        transition: all 0.3s ease;
-                                    }
-                                    .accordion-item:nth-child(${index + 1}) .accordion-button:not(.collapsed)::after {
-                                        filter: brightness(0) invert(1);
-                                    }
-                                `}</style>
-                            </Accordion.Header>
-                            <Accordion.Body className="bg-white">
-                                {renderDetailedTimeline(dayDescription)}
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    );
-                })}
-            </Accordion>
+                        return (
+                            <Accordion.Item eventKey={index.toString()} key={index}>
+                                <Accordion.Header>
+                                    <span className="fw-bold">{dayTitle}</span>
+                                </Accordion.Header>
+                                <Accordion.Body className="bg-white">
+                                    {renderDetailedTimeline(dayDescription)}
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        );
+                    })}
+                </Accordion>
+            </>
         );
     };
 
@@ -302,32 +297,35 @@ const TourDetail = () => {
     const [errors, setErrors] = useState("");
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [isBooking, setIsBooking] = useState(false);
+    const [showSuccessNotify, setShowSuccessNotify] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchTour = async () => {
             try {
                 const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/tours/${id}`);
-                const data = res.data.data.tour;
-                setTour(data);
-                setMainImage(`${process.env.REACT_APP_API_URL}/img/tours/${data.imageCover}`);
-                fetchBlog(data._id);
+                if (isMounted) {
+                    const data = res.data.data.tour;
+                    setTour(data);
+                    setMainImage(`${process.env.REACT_APP_API_URL}/img/tours/${data.imageCover}`);
+                    
+                    // Fetch Blog lồng trong fetch tour để đảm bảo có tourId
+                    try {
+                        const blogRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/blogs/by-tour/${data._id}`);
+                        setBlog(blogRes.data.data.blog);
+                    } catch {
+                        setBlog(null);
+                    }
+                }
             } catch (err) {
-                setErrors("Không thể tải thông tin Tour.");
+                if (isMounted) setErrors("Không thể tải thông tin Tour.");
             }
         };
         fetchTour();
+        return () => { isMounted = false; };
     }, [id]);
 
-    const fetchBlog = async (tourId) => {
-        try {
-            const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/blogs/by-tour/${tourId}`);
-            setBlog(res.data.data.blog);
-        } catch (err) {
-            setBlog(null);
-        }
-    };
-
-    if (!tour) return <div className="p-4 text-center">Đang tải thông tin tour...</div>;
+    if (!tour) return <div className="p-5 text-center"><Spinner animation="border" variant="primary" /> <p>Đang tải thông tin tour...</p></div>;
 
     const images = [tour.imageCover, ...(tour.images || [])];
 
@@ -348,54 +346,61 @@ const TourDetail = () => {
     };
 
     const handleConfirmBooking = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            setShowLoginModal(true);
-            return;
-        }
-        if (!form.numberOfPeople || !form.startDate) {
-            return setErrors("⚠️ Vui lòng nhập đầy đủ Số người và Ngày khởi hành!");
-        }
+    const token = localStorage.getItem("token");
+    if (!token) {
+        setShowLoginModal(true);
+        return;
+    }
+    if (!form.numberOfPeople || !form.startDate) {
+        return setErrors("⚠️ Vui lòng nhập đầy đủ Số người và Ngày khởi hành!");
+    }
 
-        setIsBooking(true);
-        setErrors("");
+    setIsBooking(true);
+    setErrors("");
 
-        try {
-            const res = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/bookings`,
-                {
-                    tour: tour._id,
-                    numberOfPeople: Number(form.numberOfPeople),
-                    startDate: form.startDate,
-                    bankCode: "",
-                    language: "vn"
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+    try {
+        const res = await axios.post(
+            `${process.env.REACT_APP_API_URL}/api/bookings`,
+            {
+                tour: tour._id,
+                numberOfPeople: Number(form.numberOfPeople),
+                startDate: form.startDate,
+                bankCode: "",
+                language: "vn"
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
 
+        // HIỆN THÔNG BÁO THÀNH CÔNG TRƯỚC
+        setShowSuccessNotify(true);
+
+        
+        setTimeout(() => {
             if (res.data?.data?.vnpUrl) {
                 window.location.href = res.data.data.vnpUrl;
             } else {
                 navigate("/payment");
             }
-        } catch (err) {
-            setErrors(err.response?.data?.message || "❌ Đặt tour thất bại!");
-            setIsBooking(false);
-        }
-    };
+        }, 2000);
 
+    } catch (err) {
+        console.error("Booking Error:", err);
+        setErrors(err.response?.data?.message || "❌ Đặt tour thất bại! Vui lòng thử lại.");
+        setIsBooking(false);
+    }
+};
     return (
         <div className="container py-4">
             <h2 className="mb-4 text-center fw-bold text-primary">{tour.title}</h2>
 
-            <div className="d-flex justify-content-center gap-4 mb-4 text-muted">
+            <div className="d-flex justify-content-center gap-4 mb-4 text-muted flex-wrap">
                 <span className="d-flex align-items-center"><MapPin className="h-4 w-4 me-1" /> {tour.destination}</span>
                 <span className="d-flex align-items-center"><Clock className="h-4 w-4 me-1" /> {tour.duration} ngày</span>
                 <span className="d-flex align-items-center"><Users className="h-4 w-4 me-1" /> Tối đa: {tour.maxGroupSize}</span>
             </div>
 
             <div className="row">
-                <div className="col-md-8">
+                <div className="col-lg-8">
                     <img
                         src={mainImage}
                         className="img-fluid rounded mb-3 shadow-sm"
@@ -403,15 +408,15 @@ const TourDetail = () => {
                         alt="Main"
                     />
 
-                    <div className="d-flex gap-2 mb-4">
+                    <div className="d-flex gap-2 mb-4 overflow-auto pb-2">
                         {images.slice(0, 6).map((img, index) => (
                             <img
                                 key={index}
                                 src={`${process.env.REACT_APP_API_URL}/img/tours/${img}`}
                                 className="rounded border shadow-sm"
                                 style={{
-                                    height: "80px", width: "80px", objectFit: "cover", cursor: "pointer",
-                                    border: mainImage?.endsWith(img) ? '3px solid #007bff' : '1px solid #ddd'
+                                    height: "80px", width: "80px", minWidth: "80px", objectFit: "cover", cursor: "pointer",
+                                    border: mainImage?.includes(img) ? '3px solid #007bff' : '1px solid #ddd'
                                 }}
                                 onClick={() => setMainImage(`${process.env.REACT_APP_API_URL}/img/tours/${img}`)}
                                 alt="thumb"
@@ -423,9 +428,9 @@ const TourDetail = () => {
                     <ReviewSection tourId={id} />
                 </div>
 
-                <div className="col-md-4">
-                    <div className="p-4 border rounded shadow-lg bg-white sticky-top" style={{ top: '80px', zIndex: '10' }}>
-                        <h4 className="text-center mb-3">Đặt Tour Ngay</h4>
+                <div className="col-lg-4 mt-4 mt-lg-0">
+                    <div className="p-4 border rounded shadow-lg bg-white sticky-top" style={{ top: '100px', zIndex: '10' }}>
+                        <h4 className="text-center mb-3 fw-bold">Đặt Tour Ngay</h4>
                         <div className="text-center mb-4">
                             <span className="text-danger fw-bolder" style={{ fontSize: "28px" }}>
                                 {tour.price?.toLocaleString()} đ
@@ -434,7 +439,7 @@ const TourDetail = () => {
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Số người</Form.Label>
+                            <Form.Label className="fw-bold">Số người</Form.Label>
                             <Form.Control
                                 type="number"
                                 name="numberOfPeople"
@@ -459,7 +464,7 @@ const TourDetail = () => {
                         </Form.Group>
 
                         <Form.Group className="mb-4">
-                            <Form.Label>Ngày kết thúc (tính tự động)</Form.Label>
+                            <Form.Label className="text-muted">Ngày kết thúc (tính tự động)</Form.Label>
                             <Form.Control type="date" value={form.endDate} disabled className="bg-light" />
                         </Form.Group>
 

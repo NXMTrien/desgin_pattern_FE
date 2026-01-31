@@ -44,7 +44,7 @@ const CheckoutBankPage = () => {
     useEffect(() => {
         const fetchBooking = async () => {
             try {
-                const res = await axios.get(`${API_URL}/bookings/my-bookings`, { headers: getAuthHeaders() });
+                const res = await axios.get(`${API_URL}/api/bookings/my-bookings`, { headers: getAuthHeaders() });
                 const b = res.data.data.bookings.find((item) => item._id === bookingId);
                 setBooking(b);
             } catch (err) {
@@ -62,7 +62,7 @@ const CheckoutBankPage = () => {
 
     const createBankPayment = async () => {
         try {
-            const res = await axios.post(`${API_URL}/payments/bank`, { bookingId }, { headers: getAuthHeaders() });
+            const res = await axios.post(`${API_URL}/api/payments/bank`, { bookingId }, { headers: getAuthHeaders() });
             setPaymentDetails(res.data);
         } catch (err) {
             setErrorMessage("Lỗi kết nối cổng thanh toán.");
@@ -99,7 +99,7 @@ const CheckoutBankPage = () => {
 
         setLoading(true);
         try {
-            await axios.post(`${API_URL}/payments/bank/notify`, { 
+            await axios.post(`${API_URL}/api/payments/bank/notify`, { 
                 paymentId: paymentDetails.paymentId,
                 // Gửi thêm thông tin nếu backend cần lưu vết giao dịch
                 cardNumber: cardInfo.cardNumber 
