@@ -11,38 +11,44 @@ function LoginForm() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Hàm xử lý chung khi đăng nhập thành công
+  const handleLoginSuccess = (data) => {
+    if (data && data.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("username", data.username);
+      
+      // Chuyển hướng dựa trên role (Giả sử 001 là admin)
+      data.role === "admin" || data.role === "001" 
+        ? navigate("/admin_register") 
+        : navigate("/");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, { email, password });
-      if (res.data && res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("role", res.data.role);
-        res.data.role === "001" ? navigate("/admin_register") : navigate("/");
-      }
+      handleLoginSuccess(res.data);
     } catch (err) {
-      setError("Sai email hoặc mật khẩu!");
+      // CHỈNH SỬA: Lấy thông báo lỗi cụ thể từ Backend (ví dụ: lỗi bị Block)
+      const message = err.response?.data?.message || "Sai email hoặc mật khẩu!";
+      setError(message);
     }
   };
 
   const onGoogleSuccess = async (credentialResponse) => {
+    setError("");
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/google-login`, {
         idToken: credentialResponse.credential 
       });
       handleLoginSuccess(res.data);
     } catch (err) {
-      setError("Đăng nhập Google thất bại. Vui lòng thử lại!");
-    }
-  };
-
-  const handleLoginSuccess = (data) => {
-    if (data && data.token) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("username", data.username);
-      data.role === "001" ? navigate("/admin_register") : navigate("/");
+      // CHỈNH SỬA: Hiển thị lỗi nếu tài khoản Google bị Block
+      const message = err.response?.data?.message || "Đăng nhập Google thất bại!";
+      setError(message);
     }
   };
 
@@ -60,7 +66,6 @@ function LoginForm() {
         .input-underline:focus { border-bottom-color: #005294; }
         .password-toggle { position: absolute; right: 0; bottom: 10px; cursor: pointer; color: #666; }
         
-        /* CẬP NHẬT MÀU NÚT: MẶC ĐỊNH XÁM - HOVER ĐỎ */
         .btn-vietravel { 
           background-color: #6c757d; 
           color: white; 
@@ -68,6 +73,7 @@ function LoginForm() {
           padding: 12px; 
           border-radius: 10px; 
           border: none; 
+          width: 100%;
           margin-top: 10px; 
           text-transform: uppercase; 
           transition: all 0.3s ease; 
@@ -77,14 +83,14 @@ function LoginForm() {
           transform: translateY(-2px); 
           box-shadow: 0 5px 15px rgba(227, 27, 35, 0.3);
         }
-
         .google-btn-container { display: flex; justify-content: center; margin-top: 10px; width: 100%; }
+        .alert-custom { background-color: #fff5f5; color: #e31b23; border: 1px solid #ffe3e3; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; font-weight: 500; }
       `}</style>
 
       <div className="login-card">
         <h2 className="login-title">Đăng nhập</h2>
 
-        {error && <div className="alert alert-danger py-2 small text-center">{error}</div>}
+        {error && <div className="alert-custom text-center">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group-custom">
@@ -118,7 +124,7 @@ function LoginForm() {
             Chưa là thành viên? <span className="text-primary fw-bold" style={{cursor:'pointer'}} onClick={() => navigate("/register")}>Đăng ký ngay</span>
           </p>
 
-          <button type="submit" className="btn btn-vietravel w-100">ĐĂNG NHẬP</button>
+          <button type="submit" className="btn btn-vietravel">ĐĂNG NHẬP</button>
         </form>
 
         <div className="text-center my-3 text-muted small">Hoặc</div>
@@ -130,7 +136,7 @@ function LoginForm() {
             useOneTap
             theme="outline"
             size="large"
-            width="450px" 
+            width="100%" 
           />
         </div>
 

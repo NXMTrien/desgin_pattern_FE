@@ -24,8 +24,7 @@ const TourList = () => {
         destination: "",
         tourType: "",
         startLocation: "",
-        travelDate: "",
-        rating: "" 
+        travelDate: ""
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +39,6 @@ const TourList = () => {
     useEffect(() => {
         const fetchTours = async () => {
             try {
-                // Thêm timestamp để tránh cache trình duyệt khi fetch
                 const res = await axios.get(`${API_URL}/api/tours`);
                 const allTours = res.data.data.tours || [];
                 const params = new URLSearchParams(location.search);
@@ -75,17 +73,7 @@ const TourList = () => {
         else if (searchFilter.budget === "10-20") result = result.filter(t => t.price > 10000000 && t.price <= 20000000);
         else if (searchFilter.budget === "above20") result = result.filter(t => t.price > 20000000);
 
-        // 2. Lọc theo Đánh giá (Đồng bộ với số thập phân)
-        if (searchFilter.rating !== "") {
-            const selectedRating = Number(searchFilter.rating);
-            result = result.filter(t => {
-                const tourRating = t.averageRating || t.ratingsAverage || 0; 
-                // Chọn 4 sao sẽ hiện tour từ 4.0 đến 4.9
-                return Math.floor(tourRating) === selectedRating;
-            });
-        }
-
-        // 3. Lọc theo Điểm đến
+        // 2. Lọc theo Điểm đến
         if (searchFilter.destination !== "") {
             const keyword = searchFilter.destination.toLowerCase();
             result = result.filter(t =>
@@ -94,13 +82,13 @@ const TourList = () => {
             );
         }
 
-        // 4. Lọc theo Điểm khởi hành
+        // 3. Lọc theo Điểm khởi hành
         if (searchFilter.startLocation !== "") {
             const loc = searchFilter.startLocation.toLowerCase();
             result = result.filter(t => t.startLocation?.toLowerCase().includes(loc));
         }
 
-        // 5. Lọc theo ngày
+        // 4. Lọc theo ngày
         if (searchFilter.travelDate) {
             const selectedDate = new Date(searchFilter.travelDate);
             result = result.filter(t => {
@@ -114,7 +102,7 @@ const TourList = () => {
     };
 
     const handleResetFilter = () => {
-        setSearchFilter({ budget: "", destination: "", tourType: "", startLocation: "", travelDate: "", rating: "" });
+        setSearchFilter({ budget: "", destination: "", tourType: "", startLocation: "", travelDate: "" });
         setFilteredTours(tours);
         setCurrentPage(1);
     };
@@ -221,28 +209,6 @@ const TourList = () => {
                                 </div>
                             </Form.Group>
 
-                            {/* Đánh giá */}
-                            <Form.Group className="mb-4">
-                                <Form.Label className="fw-bold small">Hạng đánh giá</Form.Label>
-                                <div className="d-flex flex-wrap gap-2 mt-1">
-                                    {["5", "4", "3", "2", "1"].map(star => (
-                                        <Button
-                                            key={star}
-                                            variant={searchFilter.rating === star ? "warning" : "outline-secondary"}
-                                            size="sm" 
-                                            style={{ 
-                                                width: star === "5" ? '100%' : '47%', 
-                                                fontSize: '0.75rem', 
-                                                fontWeight: '600'
-                                            }}
-                                            onClick={() => setSearchFilter({ ...searchFilter, rating: star })}
-                                        >
-                                            {star} <i className="bi bi-star-fill ms-1"></i>
-                                        </Button>
-                                    ))}
-                                </div>
-                            </Form.Group>
-
                             <Form.Group className="mb-3">
                                 <Form.Label className="fw-bold small">Điểm khởi hành</Form.Label>
                                 <Form.Select 
@@ -321,14 +287,8 @@ const TourList = () => {
                                             <Col md={8}>
                                                 <Card.Body className="p-4 d-flex flex-column h-100">
                                                     <div className="flex-grow-1">
-                                                        <div className="d-flex justify-content-between align-items-start">
-                                                            <Card.Title className="fw-bold fs-5 mb-2 text-primary">{tour.title}</Card.Title>
-                                                            {/* HIỂN THỊ ĐÁNH GIÁ ĐỒNG NHẤT 3.5 */}
-                                                            <div className="bg-warning px-2 py-1 rounded small fw-bold d-flex align-items-center">
-                                                                <i className="bi bi-star-fill me-1" style={{fontSize: '0.8rem'}}></i>
-                                                                {Number(tour.averageRating || tour.ratingsAverage || 0).toFixed(1)}
-                                                            </div>
-                                                        </div>
+                                                        <Card.Title className="fw-bold fs-5 mb-2 text-primary">{tour.title}</Card.Title>
+                                                        
                                                         <Row className="small text-secondary mt-3">
                                                             <Col xs={6} className="mb-2"><i className="bi bi-geo-alt-fill text-danger me-2"></i>{tour.destination}</Col>
                                                             <Col xs={6} className="mb-2"><i className="bi bi-clock-history me-2 text-primary"></i>{tour.duration} Ngày</Col>

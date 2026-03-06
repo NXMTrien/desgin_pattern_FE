@@ -1,126 +1,156 @@
-// src/components/AdminPaymentConfirmation.js
-
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Spinner, Alert, Table } from 'react-bootstrap';
+import { Container, Button, Spinner, Alert, Table, Badge } from 'react-bootstrap';
 import axios from 'axios';
+import { io } from "socket.io-client"; // 1. Import Socket
 
 const AdminPaymentConfirmation = () => {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [confirmingId, setConfirmingId] = useState(null); // Trạng thái đang xử lý cho từng nút
     const [error, setError] = useState('');
-    const [confirmationMessage, setConfirmationMessage] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const API_URL = `${process.env.REACT_APP_API_URL}/api`;
+    const API_URL = process.env.REACT_APP_API_URL;
 
-    // Giả định hàm lấy headers (cần có role Admin)
-    const getAuthHeaders = () => {
-        const token = localStorage.getItem('token');
-        return token ? { Authorization: `Bearer ${token}` } : {};
-    };
+    const getAuthHeaders = () => ({
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+    });
 
-    // 1. Lấy danh sách các giao dịch chờ xác nhận
     const fetchAwaitingPayments = async () => {
         setLoading(true);
-        setError('');
         try {
-            // 🚨 Giả định có API dành cho Admin để lọc các Payment đang chờ xác nhận
-            const res = await axios.get(`${API_URL}/payments/admin/awaiting`, {
+            const res = await axios.get(`${API_URL}/api/payments/admin/awaiting`, {
                 headers: getAuthHeaders(),
             });
-            setPayments(res.data.data.payments); // Giả định response trả về mảng payments
+            setPayments(res.data.data.payments || []);
         } catch (err) {
-            console.error("Error fetching payments:", err);
-            setError('Lỗi khi tải danh sách thanh toán chờ xác nhận.');
+            setError('Lỗi khi tải danh sách thanh toán.');
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchAwaitingPayments();
-    }, []);
+    useEffect(() => { 
+        fetchAwaitingPayments(); 
+        
+        // 2. Kết nối socket để lắng nghe nếu có khách báo chuyển khoản mới
+        const socket = io(API_URL, {
+            auth: { token: localStorage.getItem('token') }
+        });
+        
+        socket.emit('join_admin_room'); // Admin vào room riêng
 
-    // 2. Xác nhận thanh toán (Admin Action)
+        socket.on("newNotification", (notif) => {
+            // Nếu nhận được thông báo về thanh toán mới, load lại danh sách
+            fetchAwaitingPayments();
+        });
+
+        return () => socket.disconnect();
+    }, [API_URL]);
+
     const confirmPayment = async (paymentId) => {
-        setConfirmationMessage('');
+        if (!window.confirm("Bạn đã chắc chắn nhận được tiền từ khách hàng này? Hệ thống sẽ gửi thông báo xác nhận cho khách ngay lập tức.")) return;
+        
+        setConfirmingId(paymentId); // Hiển thị spinner trên nút đang bấm
+        setSuccess('');
+        setError('');
+
         try {
-            // Gọi API xác nhận Admin (đã được bảo vệ bằng restrictTo('admin') ở Backend)
-            const res = await axios.post(
-                `${API_URL}/payments/bank/confirm`,
-                { paymentId },
+            // 3. Gọi API xác nhận
+            const res = await axios.post(`${API_URL}/api/payments/bank/confirm`, 
+                { paymentId }, 
                 { headers: getAuthHeaders() }
             );
 
-            setConfirmationMessage(`✅ Xác nhận Payment ID: ${paymentId.slice(-6)} thành công!`);
+            // 4. Hiển thị thông báo thành công
+            setSuccess(`✅ Đã duyệt giao dịch #${paymentId.slice(-6)}. Hệ thống đã gửi thông báo đến khách hàng.`);
             
-            // Tải lại danh sách sau khi xác nhận
-            fetchAwaitingPayments(); 
+            // Tự động ẩn thông báo thành công sau 5 giây
+            setTimeout(() => setSuccess(''), 5000);
 
+            // Reload danh sách
+            fetchAwaitingPayments(); 
         } catch (err) {
-            console.error("Error confirming payment:", err);
-            const errMsg = err.response?.data?.message || 'Xác nhận thanh toán thất bại.';
-            setError(`❌ Lỗi xác nhận: ${errMsg}`);
+            setError(err.response?.data?.message || 'Xác nhận thất bại.');
+        } finally {
+            setConfirmingId(null);
         }
     };
 
-    if (loading) {
-        return <Container className="text-center my-5"><Spinner animation="border" /> Đang tải danh sách...</Container>;
-    }
-    
-    // Kiểm tra xem có payment nào đang chờ hay không
-    const awaitingPayments = payments.filter(p => p.status === 'awaiting_confirmation' && p.method === 'transfer');
+    if (loading) return (
+        <Container className="text-center my-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2 text-muted">Đang tìm các giao dịch chờ duyệt...</p>
+        </Container>
+    );
 
     return (
         <Container className="my-5">
-            <h2> Xác Nhận Thanh Toán Chuyển Khoản </h2>
-            <p className="text-muted">Quản lý các giao dịch mà khách hàng đã thông báo chuyển khoản.</p>
+            <div className="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 className="fw-bold mb-0">Xác Nhận Thanh Toán</h2>
+                    <p className="text-muted">Duyệt các giao dịch chuyển khoản thủ công (Bank Transfer).</p>
+                </div>
+                <Button variant="outline-primary" size="sm" onClick={fetchAwaitingPayments}>
+                    <i className="bi bi-arrow-clockwise"></i> Làm mới
+                </Button>
+            </div>
             
             <hr />
 
-            {confirmationMessage && <Alert variant="success">{confirmationMessage}</Alert>}
-            {error && <Alert variant="danger">{error}</Alert>}
+            {/* Thông báo kết quả */}
+            {success && <Alert variant="success" className="shadow-sm" dismissible onClose={() => setSuccess('')}>{success}</Alert>}
+            {error && <Alert variant="danger" className="shadow-sm" dismissible onClose={() => setError('')}>{error}</Alert>}
 
-            {awaitingPayments.length === 0 ? (
-                <Alert variant="info" className="text-center">
-                    Không có giao dịch chuyển khoản nào đang chờ xác nhận.
-                </Alert>
+            {payments.length === 0 ? (
+                <div className="text-center py-5 bg-light rounded shadow-sm">
+                    <i className="bi bi-check-circle text-success fs-1"></i>
+                    <p className="mt-3 text-muted">Tuyệt vời! Hiện không còn giao dịch nào chờ xác nhận.</p>
+                </div>
             ) : (
-                <Table striped bordered hover responsive>
-                    <thead>
+                <Table hover responsive className="shadow-sm align-middle bg-white">
+                    <thead className="table-dark text-nowrap">
                         <tr>
-                            <th>ID Payment</th>
-                            <th>Booking ID</th>
+                            <th>Mã GD</th>
+                            <th>Khách hàng</th>
                             <th>Số tiền</th>
-                            <th>Nội dung CK</th>
-                            <th>Thời gian báo</th>
-                            <th>Hành động</th>
+                            <th>Nội dung chuyển</th>
+                            <th>Ngày báo</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {awaitingPayments.map((payment) => (
-                            <tr key={payment._id}>
-                                <td>{payment._id.slice(-8)}</td>
-                                <td>{payment.booking?.slice(-8)}</td> 
-                                <td><strong className='text-success'>{payment.amount.toLocaleString()} VNĐ</strong></td>
-                                {/* Giả định bạn có thể lưu nội dung chuyển khoản trong paymentDetails (tùy thuộc vào backend) */}
-                                <td>THANH TOAN BOOKING {payment.booking?.slice(-6)}</td> 
+                        {payments.map((p) => (
+                            <tr key={p._id}>
+                                <td><Badge bg="secondary" className="font-monospace">#{p._id.slice(-6)}</Badge></td>
                                 <td>
-                {new Date(payment.createdAt).toLocaleString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })}
-            </td>
+                                    <div className="fw-bold">{p.booking?.user?.name || 'Khách lẻ'}</div>
+                                    <small className="text-muted">{p.booking?.user?.email}</small>
+                                </td>
+                                <td className="text-success fw-bold">
+                                    {p.amount.toLocaleString('vi-VN')}₫
+                                </td>
+                                <td>
+                                    <code className="bg-light p-1 border rounded text-primary">
+                                        THANH TOAN BOOKING {p.booking?._id?.slice(-6)}
+                                    </code>
+                                </td>
+                                <td>
+                                    <small>{new Date(p.createdAt).toLocaleString('vi-VN')}</small>
+                                </td>
                                 <td>
                                     <Button 
                                         variant="success" 
-                                        size="sm"
-                                        onClick={() => confirmPayment(payment._id)}
-                                        disabled={loading} // Sử dụng trạng thái loading riêng nếu cần chi tiết hơn
+                                        size="sm" 
+                                        className="w-100"
+                                        onClick={() => confirmPayment(p._id)}
+                                        disabled={confirmingId === p._id}
                                     >
-                                        Xác nhận Đã Nhận Tiền
+                                        {confirmingId === p._id ? (
+                                            <><Spinner size="sm" animation="border" className="me-1"/> Đang duyệt...</>
+                                        ) : (
+                                            <><i className="bi bi-shield-check me-1"></i> Xác nhận khớp tiền</>
+                                        )}
                                     </Button>
                                 </td>
                             </tr>
@@ -128,10 +158,6 @@ const AdminPaymentConfirmation = () => {
                     </tbody>
                 </Table>
             )}
-            
-            <Button onClick={fetchAwaitingPayments} variant="outline-secondary" className="mt-3">
-                <i className="fas fa-sync-alt"></i> Tải lại danh sách
-            </Button>
         </Container>
     );
 };

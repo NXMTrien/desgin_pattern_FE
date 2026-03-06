@@ -32,7 +32,7 @@ const TourForm = () => {
     const [formData, setFormData] = useState({
         title: "", destination: "", duration: 1, category: "", price: "",
         maxGroupSize: "", description: "", startLocation: "TP. Hồ Chí Minh",
-        startDates: [], currentDateInput: ""
+        startDate: [], currentDateInput: ""
     });
 
     const [imageCover, setImageCover] = useState(null);
@@ -45,19 +45,14 @@ const TourForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-    const userRole = localStorage.getItem("role");
-    
-    if (userRole) {
-        setRole(userRole);
-    } else {
-        setRole("guest");
-    }
+        const userRole = localStorage.getItem("role");
+        setRole(userRole || "guest");
 
-    if (userRole === "admin") {
-        fetchCategories();
-        fetchTours();
-    }
-}, []);
+        if (userRole === "admin") {
+            fetchCategories();
+            fetchTours();
+        }
+    }, []);
 
     const getAuthHeaders = () => {
         const token = localStorage.getItem("token");
@@ -74,6 +69,7 @@ const TourForm = () => {
     const fetchTours = async () => {
         try {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/tours`);
+            console.log("Dữ liệu Tour mới nhất từ Server:", res.data.data.tours);
             setTours(res.data.data.tours || []);
         } catch (error) { console.error("Lỗi fetch tours:", error); }
     };
@@ -100,14 +96,14 @@ const TourForm = () => {
 
     const addDate = () => {
         if (!formData.currentDateInput) return;
-        if (formData.startDates.includes(formData.currentDateInput)) {
+        if (formData.startDate.includes(formData.currentDateInput)) {
             setMessage("❌ Ngày này đã có trong danh sách!");
             setTimeout(() => setMessage(""), 3000);
             return;
         }
         setFormData(prev => ({
             ...prev,
-            startDates: [...prev.startDates, prev.currentDateInput].sort(),
+            startDate: [...prev.startDate, prev.currentDateInput].sort(),
             currentDateInput: ""
         }));
     };
@@ -115,7 +111,7 @@ const TourForm = () => {
     const removeDate = (dateToRemove) => {
         setFormData(prev => ({ 
             ...prev, 
-            startDates: prev.startDates.filter(d => d !== dateToRemove) 
+            startDate: prev.startDate.filter(d => d !== dateToRemove) 
         }));
     };
 
@@ -124,7 +120,7 @@ const TourForm = () => {
         setFormData({
             title: "", destination: "", duration: 1, category: "", price: "",
             maxGroupSize: "", description: "", startLocation: "TP. Hồ Chí Minh", 
-            startDates: [], currentDateInput: ""
+            startDate: [], currentDateInput: ""
         });
         setImageCover(null);
         setOtherImages([]);
@@ -142,10 +138,17 @@ const TourForm = () => {
             maxGroupSize: tour.maxGroupSize || "",
             description: tour.description || "",
             startLocation: tour.startLocation || "TP. Hồ Chí Minh",
-            startDates: Array.isArray(tour.startDate) 
+            startDate: Array.isArray(tour.startDate) 
                 ? tour.startDate.map(date => new Date(date).toISOString().split('T')[0]) 
                 : [],
             currentDateInput: ""
+        });
+        // Quan trọng: Reset file state khi nhấn Edit để tránh gửi URL cũ lên Server
+        setImageCover(null);
+        setOtherImages([]);
+        setPreviews({ 
+            cover: tour.imageCover || null, 
+            others: Array.isArray(tour.images) ? tour.images : [] 
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -164,12 +167,7 @@ const TourForm = () => {
             setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
             setMessage(`✅ Xóa tour thành công!`);
         } catch (err) {
-            if (err.response && err.response.status === 404) {
-                setTours(prevTours => prevTours.filter(item => item._id !== tour._id));
-                setMessage("ℹ️ Tour không tồn tại hoặc đã được xóa trước đó.");
-            } else {
-                setMessage(`❌ Lỗi: ${err.response?.data?.message || "Không thể xóa tour"}`);
-            }
+            setMessage(`❌ Lỗi: ${err.response?.data?.message || "Không thể xóa tour"}`);
         } finally {
             setDeletingId(null);
             setTimeout(() => setMessage(""), 3000);
@@ -181,27 +179,46 @@ const TourForm = () => {
         setIsSubmitting(true);
         try {
             const tourFormData = new FormData();
-            tourFormData.append('title', formData.title);
-            tourFormData.append('destination', formData.destination);
-            tourFormData.append('duration', formData.duration);
-            tourFormData.append('category', formData.category);
-            tourFormData.append('price', formData.price);
-            tourFormData.append('maxGroupSize', formData.maxGroupSize);
-            tourFormData.append('description', formData.description);
-            tourFormData.append('startLocation', formData.startLocation);
-            if (formData.startDates.length === 0) {
-                tourFormData.append('startDate', ''); 
-            } else {
-                formData.startDates.forEach(date => tourFormData.append('startDate', date));
-            }
-            if (imageCover) tourFormData.append('imageCover', imageCover);
-            otherImages.forEach(file => tourFormData.append('images', file));
+            
+            // 1. Append basic fields
+            const fields = ['title', 'destination', 'duration', 'category', 'price', 'maxGroupSize', 'description', 'startLocation'];
+            fields.forEach(field => tourFormData.append(field, formData[field]));
 
-            const url = editingTourId ? `${process.env.REACT_APP_API_URL}/api/tours/${editingTourId}` : `${process.env.REACT_APP_API_URL}/api/tours`;
-            const method = editingTourId ? 'patch' : 'post';
-            const response = await axios[method](url, tourFormData, {
-                headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' }
+            // 2. Xử lý startDate thành chuỗi CSV (Khớp với logic .split(',') của Backend)
+            if (formData.startDate && formData.startDate.length > 0) {
+                tourFormData.append('startDate', formData.startDate.join(','));
+            } else {
+                tourFormData.append('startDate', '');
+            }
+
+            // 3. Xử lý ImageCover: Chỉ gửi nếu là file mới (instanceof File)
+            if (imageCover instanceof File) {
+                tourFormData.append('imageCover', imageCover);
+            }
+
+            // 4. Xử lý Album ảnh phụ: Chỉ gửi những file thực sự được chọn mới
+            otherImages.forEach(file => {
+                if (file instanceof File) {
+                    tourFormData.append('images', file);
+                }
             });
+
+            const url = editingTourId 
+                ? `${process.env.REACT_APP_API_URL}/api/tours/${editingTourId}` 
+                : `${process.env.REACT_APP_API_URL}/api/tours`;
+            
+            const method = editingTourId ? 'patch' : 'post';
+
+            const response = await axios({
+                method,
+                url,
+                data: tourFormData,
+                headers: { 
+                    ...getAuthHeaders(), 
+                    'Content-Type': 'multipart/form-data' 
+                }
+            });
+
             const newTourId = response.data.data.tour?._id;
 
             if (editingTourId) {
@@ -214,6 +231,7 @@ const TourForm = () => {
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
+            console.error("Lỗi API:", err.response?.data);
             setMessage(`❌ Lỗi: ${err.response?.data?.message || "Thao tác thất bại"}`);
         } finally {
             setIsSubmitting(false);
@@ -316,7 +334,7 @@ const TourForm = () => {
                             </div>
                         </div>
                         <div className="col-12 d-flex flex-wrap gap-2 mt-2">
-                            {formData.startDates.map(date => (
+                            {formData.startDate.map(date => (
                                 <span key={date} className="badge bg-primary-subtle text-primary border p-2 d-flex align-items-center gap-2">
                                     {new Date(date).toLocaleDateString('vi-VN')}
                                     <XCircle size={14} className="cursor-pointer" onClick={() => removeDate(date)} />
