@@ -20,7 +20,7 @@ function LoginForm() {
       
       // Chuyển hướng dựa trên role (Giả sử 001 là admin)
       data.role === "admin" || data.role === "001" 
-        ? navigate("/admin_register") 
+        ? navigate("/") 
         : navigate("/");
     }
   };
